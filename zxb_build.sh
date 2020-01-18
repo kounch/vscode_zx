@@ -99,7 +99,7 @@ if [[ $action == "runCspect" ]] || [[ $action == "runZEsarUX" ]]; then
 	"$mypath/hdfmonkey" put "$imagepath" "$filedir/build/$filename.bas" /devel/test.bas
 	retval=$?
 	if [ $retval -ne 0 ]; then
-		echo "Copy Error!!!"
+		echo "Copy Error!!! ($filename.bas)"
 		exit $retVal
 	fi
 
@@ -107,9 +107,20 @@ if [[ $action == "runCspect" ]] || [[ $action == "runZEsarUX" ]]; then
 		"$mypath/hdfmonkey" put "$imagepath" "$filedir/build/$filename.bin" /devel/
 		retval=$?
 		if [ $retval -ne 0 ]; then
-			echo "Copy Error!!!"
+			echo "Copy Error!!! ($filename.bin)"
 			exit $retVal
 		fi
+	fi
+
+	if [[ -f "$filedir/$filename.filelist" ]]; then
+		while read line; do 
+			"$mypath/hdfmonkey" put "$imagepath" "$filedir/$line" /devel/
+			retval=$?
+			if [ $retval -ne 0 ]; then
+				echo "Copy Error!!! ($line)"
+				exit $retVal
+			fi
+		done < "$filedir/$filename.filelist"
 	fi
 fi
 shopt -u nocasematch
