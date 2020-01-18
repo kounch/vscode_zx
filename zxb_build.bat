@@ -18,11 +18,12 @@ SETLOCAL EnableDelayedExpansion
 
 SET MYPATH=%~dp0
 SET MYDRIVE=%~d0
-SET ACTION=%1
-SET FULLFILE=%~f2
-SET FILENAME=%~n2
-SET EXTENSION=%~x2
-SET FILEDIR=%~dp2
+SET MODE=%1
+SET ACTION=%2
+SET FULLFILE=%~f3
+SET FILENAME=%~n3
+SET EXTENSION=%~x3
+SET FILEDIR=%~dp3
 
 IF /I NOT "%EXTENSION%"==".bas" (
     ECHO ERROR^^!^^! Not a .bas file^^!^^!^^!
@@ -41,21 +42,33 @@ IF NOT %RETVAL% EQU 0 (
     exit /b %RETVAL%
 )
 
-ECHO Compiling %FILENAME%.bas...
-mkdir "%FILEDIR%\build" 2>NUL
-py -3 "%MYPATH%\zxbasic\zxb.py" -O 2 "%FULLFILE%" -o "%FILEDIR%\build\%FILENAME%.bin"
-SET RETVAL=%ERRORLEVEL%
-IF NOT %RETVAL% EQU 0 (
-    ECHO Compilation Error^^!^^!^^!
-    exit /b %RETVAL%
+IF /I "%MODE%"=="zxbasic" (
+	ECHO Compiling %FILENAME%.bas...
+	mkdir "%FILEDIR%\build" 2>NUL
+	py -3 "%MYPATH%\zxbasic\zxb.py" -O 2 "%FULLFILE%" -o "%FILEDIR%\build\%FILENAME%.bin"
+	SET RETVAL=%ERRORLEVEL%
+	IF NOT %RETVAL% EQU 0 (
+		ECHO Compilation Error^^!^^!^^!
+		exit /b %RETVAL%
+	)
+
+	ECHO Creating Launcher...
+	py -3 "%MYPATH%\txt2nextbasic.py" -n "%FILENAME%.bin" -o "%FILEDIR%\build\%FILENAME%.bas"
+	SET RETVAL=%ERRORLEVEL%
+	IF NOT %RETVAL% EQU 0 (
+		ECHO Launcher Creation Error^^!^^!^^!
+		exit /b %RETVAL%
+	)
 )
 
-ECHO Creating Launcher...
-py -3 "%MYPATH%\txt2nextbasic.py" -n "%FILENAME%.bin" -o "%FILEDIR%\build\%FILENAME%.bas"
-SET RETVAL=%ERRORLEVEL%
-IF NOT %RETVAL% EQU 0 (
-    ECHO Launcher Creation Error^^!^^!^^!
-    exit /b %RETVAL%
+IF /I "%MODE%"=="nextbasic" (
+	ECHO Converting %FILENAME%.bas...
+	py -3 "%MYPATH%\txt2nextbasic.py" -i "%FULLFILE%" -o "%FILEDIR%\build\%FILENAME%.bas"
+	SET RETVAL=%ERRORLEVEL%
+	IF NOT %RETVAL% EQU 0 (
+		ECHO Conversion Error^^!^^!^^!
+		exit /b %RETVAL%
+	)
 )
 
 IF /I "%ACTION%"=="runCspect" (
@@ -79,11 +92,13 @@ IF /I "%ACTION%"=="runCspect" (
 		exit /b %RETVAL%
 	)
 
-	"%MYPATH%\hdfmonkey.exe" put "%IMAGEPATH%" "%FILEDIR%\build\%FILENAME%.bin" /devel/
-	SET RETVAL=%ERRORLEVEL%
-	IF NOT %RETVAL% EQU 0 (
-		ECHO Copy Error^^!^^!^^!
-		exit /b %RETVAL%
+	IF /I "%MODE%"=="zxbasic" (
+		"%MYPATH%\hdfmonkey.exe" put "%IMAGEPATH%" "%FILEDIR%\build\%FILENAME%.bin" /devel/
+		SET RETVAL=%ERRORLEVEL%
+		IF NOT %RETVAL% EQU 0 (
+			ECHO Copy Error^^!^^!^^!
+			exit /b %RETVAL%
+		)
 	)
 
 IF /I "%ACTION%"=="runCspect" (

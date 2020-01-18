@@ -103,7 +103,7 @@ if [[ $action == "runCspect" ]] || [[ $action == "runZEsarUX" ]]; then
 		exit $retVal
 	fi
 
-	if [[ $extension == "bas" ]]; then 
+	if [[ $mode == "zxbasic" ]]; then 
 		"$mypath/hdfmonkey" put "$imagepath" "$filedir/build/$filename.bin" /devel/
 		retval=$?
 		if [ $retval -ne 0 ]; then
