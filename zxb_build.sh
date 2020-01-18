@@ -114,7 +114,7 @@ if [[ $action == "runCspect" ]] || [[ $action == "runZEsarUX" ]]; then
 
 	if [[ -f "$filedir/$filename.filelist" ]]; then
 		while read line; do 
-			"$mypath/hdfmonkey" put "$imagepath" "$filedir/$line" /devel/
+			"$mypath/hdfmonkey" put "$imagepath" "$filedir/${line%$'\r'}" /devel/
 			retval=$?
 			if [ $retval -ne 0 ]; then
 				echo "Copy Error!!! ($line)"
