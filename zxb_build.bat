@@ -88,7 +88,7 @@ IF /I "%ACTION%"=="runCspect" (
 	"%MYPATH%\hdfmonkey.exe" put "%IMAGEPATH%" "%FILEDIR%\build\%FILENAME%.bas" /devel/test.bas
 	SET RETVAL=%ERRORLEVEL%
 	IF NOT %RETVAL% EQU 0 (
-		ECHO Copy Error^^!^^!^^!
+		ECHO Copy Error^^!^^!^^! (%FILENAME%.bas)
 		exit /b %RETVAL%
 	)
 
@@ -96,8 +96,19 @@ IF /I "%ACTION%"=="runCspect" (
 		"%MYPATH%\hdfmonkey.exe" put "%IMAGEPATH%" "%FILEDIR%\build\%FILENAME%.bin" /devel/
 		SET RETVAL=%ERRORLEVEL%
 		IF NOT %RETVAL% EQU 0 (
-			ECHO Copy Error^^!^^!^^!
+			ECHO Copy Error^^!^^!^^! (%FILENAME%.bin)
 			exit /b %RETVAL%
+		)
+	)
+
+	IF EXIST "%FILEDIR%\%FILENAME%.filelist" (
+		FOR /f %%F in ("%FILEDIR%\%FILENAME%.filelist") DO (
+			"%MYPATH%\hdfmonkey.exe" put "%IMAGEPATH%" "%FILEDIR%\%F%" /devel/
+			SET RETVAL=%ERRORLEVEL%
+			IF NOT %RETVAL% EQU 0 (
+				ECHO Copy Error^^!^^!^^! (%FILEDIR%)
+				exit /b %RETVAL%
+			)
 		)
 	)
 
