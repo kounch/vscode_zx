@@ -1,0 +1,113 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build ZX Basic",
+            "type": "shell",
+            "command": "${workspaceFolder}/../zxb_build.sh",
+            "windows": {
+              "command": "${workspaceFolder}\\..\\zxb_build.bat"
+            },
+            "args": [
+                "zxbasic",
+                "build",
+                "${file}"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build NextBASIC",
+            "type": "shell",
+            "command": "${workspaceFolder}/../zxb_build.sh",
+            "windows": {
+              "command": "${workspaceFolder}\\..\\zxb_build.bat"
+            },
+            "args": [
+                "nextbasic",
+                "build",
+                "${file}"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build ZX Basic And Run (CSpect)",
+            "type": "shell",
+            "command": "${workspaceFolder}/../zxb_build.sh",
+            "windows": {
+                "command": "${workspaceFolder}\\..\\zxb_build.bat"
+              },
+            "args": [
+                "zxbasic",
+                "runCspect",
+                "${file}"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build ZX Basic And Run(ZEsarUX)",
+            "type": "shell",
+            "command": "${workspaceFolder}/../zxb_build.sh",
+            "windows": {
+                "command": "${workspaceFolder}\\..\\zxb_build.bat"
+              },
+            "args": [
+                "zxbasic",
+                "runZEsarUX",
+                "${file}"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build NextBASIC And Run (CSpect)",
+            "type": "shell",
+            "command": "${workspaceFolder}/../zxb_build.sh",
+            "windows": {
+                "command": "${workspaceFolder}\\..\\zxb_build.bat"
+              },
+            "args": [
+                "nextbasic",
+                "runCspect",
+                "${file}"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build NextBASIC And Run(ZEsarUX)",
+            "type": "shell",
+            "command": "${workspaceFolder}/../zxb_build.sh",
+            "windows": {
+                "command": "${workspaceFolder}\\..\\zxb_build.bat"
+              },
+            "args": [
+                "nextbasic",
+                "runZEsarUX",
+                "${file}"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}

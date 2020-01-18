@@ -1,0 +1,85 @@
+;ZEsarUX configuration file
+;
+;Lines beginning with ; or # are ignored
+;You can specify here the same options passed on command line, for example:
+;--verbose 2
+;Options can be written in quotation marks, for example:
+;--joystickemulated "OPQA Space"
+;Options can be written on the same line or different lines, like:
+;--verbose 2 --machine 128k
+;Or:
+;--verbose 2
+;--machine 128k
+;Or even like this:
+;--verbose
+;2
+;--machine
+;128k
+
+;Run zesarux with --help or --experthelp to see all the options
+
+--zoom 1 
+--reduce-075-offset-x 0 
+--reduce-075-offset-y 0 
+--watermark-position 3 
+--zxdesktop-width 256 
+--zxdesktop-fill-type 1 
+--zxdesktop-fill-solid-color 0 
+--ao coreaudio 
+--vo cocoa 
+--disable-silencedetector 
+--kempstonmouse-sens 1 
+--no-spectrum-reduced-core 
+--machine TBBlue 
+--vsync-minimum-length 518 
+--arttextthresold 4 
+--textfps 10 
+--tool-sox-path "/usr/bin/sox" 
+--tool-gunzip-path "/usr/bin/gunzip" 
+--tool-tar-path "/usr/bin/tar" 
+--tool-unrar-path "/usr/bin/unrar" 
+--mmc-file "(...)/ZEsarUX.app/Contents/Resources/tbblue.mmc" 
+--enable-mmc 
+--enable-divmmc-ports 
+--showfiredbreakpoint 0 
+--nosplash 
+--cpu-usage 
+--menu-mix-method "Over" 
+--menu-transparency-perc 10 
+--realvideo 
+--totalaychips 3 
+--ay-stereo-mode 2 
+--ay-stereo-channel A 0 
+--ay-stereo-channel B 1 
+--ay-stereo-channel C 2 
+--enableaudiodac 
+--audiodactype "Specdrum" 
+--midi-client 0 
+--midi-port 0 
+--gui-style "Clean" 
+--zeng-remote-port 10000 
+--zeng-snapshot-interval 2 
+--total-minutes-use 0 
+--stats-send-already-asked 
+--stats-send-enabled 
+--stats-uuid 1579358953.204715 
+--stats-speccy-queries 0 
+--stats-zx81-queries 0 
+--stats-disable-check-updates 
+--stats-last-avail-version 8.1-B2 
+--last-version "1576522567" 
+--windowgeometry filesel 7 8 30 23 
+--joystickemulated "Cursor&Shift" 
+--remoteprotocol-port 10000 
+--realjoystickpath /dev/input/js0 
+--realjoystick-calibrate 16383 
+--text-keyboard-add "~~north" 
+--text-keyboard-add "~~west" 
+--text-keyboard-add "~~east" 
+--text-keyboard-add "~~south" 
+--text-keyboard-add "loo~~k" 
+--text-keyboard-add "e~~xamine" 
+--text-keyboard-add "~~help" 
+--text-keyboard-add "~~talk" 
+--text-keyboard-add "ex~~it" 
+--text-keyboard-length 50 

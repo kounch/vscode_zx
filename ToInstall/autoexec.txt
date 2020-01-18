@@ -1,0 +1,9 @@
+#program autoexec
+#autostart
+  10 CLS 
+  20 PRINT AT 2,5;"Press any key to Debug..."
+  30 PRINT 
+  40 PRINT AT 4,8;"BREAK to EXIT"
+  50 PAUSE 0
+  60 CD "/devel"
+  70 LOAD "test.bas"
