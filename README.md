@@ -6,7 +6,150 @@ Visual Studio Tasks and Scripts for NextBASIC and ZX Basic
 
 ## English
 
-### What this plugin does
+### Software needed
+
+- **Visual Studio Code**. Docs, downloads, etc. [here](https://code.visualstudio.com/)
+
+- **Python 3.x**. Docs, downloads, etc. [here](https://www.python.org/)
+
+- **ZX Basic**. Version 1.8.10 or later (.zip or .tar.gz). Docs, download, etcs. [here](https://zxbasic.readthedocs.io)
+
+- **NextLibs for ZX Basic**. More info [here](http://zxbasic.uk/nextbuild/the-nextlibs/). Download [here](http://zxbasic.uk/nextbuild/download/)
+
+### Optional Software
+
+- **hdfmonkey**. Download, [here](http://files.zxdemo.org/gasman/speccy/hdfmonkey/). Source Code [here](https://github.com/gasman/hdfmonkey). Binary for Windows [here](http://uto.speccy.org/)
+
+- **CSpect**. The latest development version can be found [here](https://dailly.blogspot.com/)
+
+- **ZEsarUX**. Docs, downloads, etc. [here](https://github.com/chernandezba/zesarux)
+
+### Installation
+
+#### Basic Install
+
+If it wasn't already, install Python 3. On Windows, make sure that `py launcher` is selected as install option.
+
+Create a directory structure like this:
+
+    vscode_zx/
+       |
+       +--zxbasic/
+       |
+       +--Projects/
+       |     |
+       |     +--.vscode/
+       |           |
+       |           +--tasks.json
+       |
+       +--txt2nextbasic.py
+       +--zxb_build.sh  (zxb_build.bat en el caso de Windows)
+
+Projects directory can be renamed, but it *must* be next to  `txt2nextbasic.py` y `zxb_build...`.
+
+Extract to `zxbasic` the full ZX Basic distribution, and then copy the file `nextlib.bas` (from `NextBuild-current.zip`: `NextBuildv5/ZXBC/library/`) to `zxbasic/library/`.
+
+#### Installation with two emulators
+
+If you also want the option to compile and launch with the emulators, expand the directory structure like this:
+
+    vscode_zx/
+       |
+       +--CSpect/
+       +--ZEsarUX/
+       +--zesaruxrc (zesaruxwinrc for Windows)
+       +--zxbasic/
+       |
+       +--Projects/
+       |     |
+       |     +--.vscode/
+       |           |
+       |           +--tasks.json
+       |
+       +--txt2nextbasic.py
+       +--zxb_build.sh  (zxb_build.bat for Windows)
+       |
+       +--hdfmonkey  (hdfmonkey.exe for Windows)
+
+...and extract in `CSpect/` and `ZEsarUX/` both emulators (on MacOS, copy ZEsarUX app next to `zxb_build.sh`).
+
+Now we have to set up the virtual SD card for each emulator.
+
+##### CSpect configuration
+
+After obtaining an SD image, rename it as `systemnext.img`, and copy to `CSpect/` directory, with the files `enNextZX.rom` and `enNxtmmc.rom`. (Read [here](https://www.specnext.com/latestdistro/) and [here](http://www.zxspectrumnext.online/cspect/) to download).
+
+Create the SD directory where the compiled software will be put:
+
+    cd /(...)/vscode_zx/
+    hdfmonkey mkdir ./CSpect/systemnext.img /devel
+
+Optionally, using `hdfmonkey`, we can replace the original distro `autoexec.bat` for the one availble in `ToInstall/autoexec.bas`. For example:
+
+    hdfmonkey put ./CSpect/systemnext.img ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
+
+##### ZEsarUX Configuration
+
+Edit the file `zesaruxrc` (`zesaruxwinrc` for Windows), writing after `--mmc-file` the full path to the file `tbblue.mmc`.
+
+You can use the file that comes with the emulator distribution. If you prefer using another one, change its name to `tbblue.mmc`, and copy to `ZEsarUX/` directory.
+
+The, create the structure in the virtual SD where the compiled software will be copied:
+
+    cd /(...)/vscode_zx/
+    hdfmonkey mkdir ./ZEsarUX/tbblue.mmc /devel
+
+If it's MacOS:
+
+    cd /(...)/vscode_zx/
+    hdfmonkey mkdir ./ZEsarUX.app/Contents/Resources/tbblue.mmc /devel
+
+Optionally, using `hdfmonkey`, we can replace the original distro `autoexec.bat` for the one availble in `ToInstall/autoexec.bas`. For example:
+
+    hdfmonkey put ./ZEsarUX/tbblue.mmc ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
+
+On MacOS:
+
+    hdfmonkey put ./ZEsarUX.app/Contents/Resources/tbblue.mmc ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
+
+### How to use
+
+#### Compiling
+
+Open the directory "Projects" with Visual Studio Code.
+
+The `tasks.json` file creates a couple of Visual Studio Code tasks named `Build ZX Basic` and `Build NextBASIC` that, when invoked with a `.bas` file selected,creates a `build` directory and, inside of this, a `.bin` file with the compiled program if ZX Basic was selected, or a `.bas` file if NextBASIC. Also, in the case of ZX Basic, a launcher  `.bas` file is created, so it can be launched from the ZX Next Browser, ESXDOS o +3e DOS.
+
+For example, starting with this ZX Basic source file:
+
+       +--Projects/
+             |
+             +--.vscode/
+             |     |
+             |     +--tasks.json
+             |
+             +--Ejemplo.bas
+
+After running `Build ZX Basic` we will get:
+
+       +--Projects/
+             |
+             +--.vscode/
+             |     |
+             |     +--tasks.json
+             |
+             +--Ejemplo.bas
+             |
+             +--build/
+                  |
+                  +-Ejemplo.bas
+                  +-Ejemplo.bin
+
+`.bas` files do not neede to be created in the root of `Projects`, there can be as many subdirectories as you want.
+
+#### Compiling and executing with emulator
+
+For each of the compiling options, there are also two other tasks named `Build ... And Run (CSpect)` and `Build ... And Run (ZEsarUX)` which can be used to compile, copy the new created files (`.bas` and, possibly, `.bin`) inside the virtual SD for the selected emulator, and then launch the emulator. If the `autoexec.bas` file has also been changed, a small BASIC program will start, where, pressing any key but BREAK will try to start the new program. If you press BREAK, ZX Next browser will be launched instead.
 
 ---
 
@@ -16,41 +159,27 @@ Tareas y scripts de Visual Studio Code para el desarrollo en NextBASIC y ZX Basi
 
 ### Software necesario
 
-#### Visual Studio Code
+- **Visual Studio Code**. Documentación, descarga, etc. [aquí](https://code.visualstudio.com/)
 
-Documentación, descarga, etc. [aquí](https://code.visualstudio.com/)
+- **Python 3.x**. Documentación, descarga, etc. [aquí](https://www.python.org/)
 
-#### Python 3.x
+- **ZX Basic**. Documentación, descarga, etc. [aquí](https://zxbasic.readthedocs.io). Se necesita, al menos, la versión 1.8.10 (en formato .zip o .tar.gz)
 
-Documentación, descarga, etc. [aquí](https://www.python.org/)
-
-#### ZX Basic
-
-Documentación, descarga, etc. [aquí](https://zxbasic.readthedocs.io)
-
-Se necesita, al menos, la versión 1.8.10 (en formato .zip o .tar.gz)
-
-NextLibs para ZX Basic. Leer más [aquí](http://zxbasic.uk/nextbuild/the-nextlibs/). Descargar [aquí](http://zxbasic.uk/nextbuild/download/)
+- **NextLibs para ZX Basic**. Leer más [aquí](http://zxbasic.uk/nextbuild/the-nextlibs/). Descargar [aquí](http://zxbasic.uk/nextbuild/download/)
 
 ### Software opcional
 
-#### hdfmonkey
+- **hdfmonkey**. Descarga, [aquí](http://files.zxdemo.org/gasman/speccy/hdfmonkey/). Código fuente [aquí](https://github.com/gasman/hdfmonkey). Versión compilada para Windows [aquí](http://uto.speccy.org/)
 
-Descarga, [aquí](http://files.zxdemo.org/gasman/speccy/hdfmonkey/). Código fuente [aquí](https://github.com/gasman/hdfmonkey). Versión compilada para Windows [aquí](http://uto.speccy.org/)
+- **CSpect**. La última versión en desarrollo se puede obtener [aquí](https://dailly.blogspot.com/)
 
-#### CSpect
-
-La última versión en desarrollo se puede obtener [aquí](https://dailly.blogspot.com/)
-
-#### ZEsarUX
-
-Documentación, descarga, etc. [aquí](https://github.com/chernandezba/zesarux)
+- **ZEsarUX**. Documentación, descarga, etc. [aquí](https://github.com/chernandezba/zesarux)
 
 ### Instalación
 
 #### Instalación Básica
 
-Si no estaba ya, instalar Python 3. En el caso de Windows, asegurarse de que se incluye `py launcher` en las opciones de instalación.
+Instalar Python 3 para el sistema operativo correspondiente. En el caso de Windows, asegurarse de que se incluye `py launcher` en las opciones de instalación.
 
 Crear una estructura de directorios similar a la siguiente:
 
@@ -64,10 +193,10 @@ Crear una estructura de directorios similar a la siguiente:
        |           |
        |           +--tasks.json
        |
-       +--zxbloadermaker.py
+       +--txt2nextbasic.py
        +--zxb_build.sh  (zxb_build.bat en el caso de Windows)
 
-La carpeta Projects se puede renombrar, pero ha de estar al lado de `zxbloadermaker.py` y `zxb_build...`.
+La carpeta Projects se puede renombrar, pero ha de estar al lado de `txt2nextbasic.py` y `zxb_build...`.
 
 Descomprimir en `zxbasic` la distribución completa de ZX Basic, y luego copiar el archivo `nextlib.bas` (de `NextBuild-current.zip`: `NextBuildv5/ZXBC/library/`) en `zxbasic/library/`.
 
@@ -88,7 +217,7 @@ Si se desea tener también la opción de compilar y lanzar en los emuladores, am
        |           |
        |           +--tasks.json
        |
-       +--zxbloadermaker.py
+       +--txt2nextbasic.py
        +--zxb_build.sh  (zxb_build.bat en el caso de Windows)
        |
        +--hdfmonkey  (hdfmonkey.exe en el caso de Windows)
@@ -140,9 +269,9 @@ En el caso de MacOS
 
 Abrir el directorio "Projects" (o con el nombre que se haya definido) desde Visual Studio Code.
 
-El fichero `tasks.json` define una tarea llamada de Visual Studio Code `Build` que, al ser invocada sobre un fichero `.zbas` de ZX Basic, creará un directorio `build` y, dentro de este, un fichero `.bin` con el programa compilado, y un lanzador `.bas` para poder iniciarlo desde el navegador de ZX Next, ESXDOS o +3e DOS.
+El fichero `tasks.json` define varia tareas de Visual Studio Code `Build ZX Basic` y `Build NextBASIC` que, al ser invocadas sobre un fichero `.bas`, creará un directorio `build` y, dentro de este, en el caso de NextBASIC, un fichero `.bas` con el programa y, en el caso de ZX Basic, un fichero `.bin` con el programa compilado, y un lanzador `.bas` para poder iniciarlo desde el navegador de ZX Next, ESXDOS o +3e DOS.
 
-Por ejemplo, partiendo de
+Por ejemplo, partiendo de un fichero ZX Basic:
 
        +--Projects/
              |
@@ -152,7 +281,7 @@ Por ejemplo, partiendo de
              |
              +--Ejemplo.bas
 
-Tras ejecutar la tarea, se creará
+Tras ejecutar la tarea, se creará:
 
        +--Projects/
              |
@@ -171,4 +300,4 @@ Los ficheros `.bas` no tienen por qué estar en la raíz del directorio `Project
 
 #### Compilación y ejecución en emulador
 
-Existen otras dos tareas llamadas `Build And Run (CSpect)` y `Build And Run (ZEsarUX)` que sirven para realizar una compilación, copiar los dos archivos (`.bin` y `.bas`) en la SD virtual del emulador correspondiente, y luego lanzarlo. Si, además, se ha configurado el archivo `autoexec.bas`, se iniciará directamente un programa donde, pulsando cualquier tecla, excepto BREAK (Mayúsculas + Espacio), se intentará ejecutar el programa compilado. Si se pulsa BREAK, se saldrá al navegador de ZX Next.
+Existen otras dos tareas llamadas `Build ... And Run (CSpect)` y `Build .. And Run (ZEsarUX)` que sirven para realizar una compilación, copiar los dos archivos (`.bin` y `.bas`) en la SD virtual del emulador correspondiente, y luego lanzarlo. Si, además, se ha configurado el archivo `autoexec.bas`, se iniciará directamente un programa donde, pulsando cualquier tecla, excepto BREAK (Mayúsculas + Espacio), se intentará ejecutar el programa compilado. Si se pulsa BREAK, se saldrá al navegador de ZX Next.
