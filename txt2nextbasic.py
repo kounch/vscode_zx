@@ -57,12 +57,6 @@ def main():
     """Main Routine"""
 
     arg_data = parse_args()
-    #arg_data = {}
-    #arg_data['input'] = 'D:\\dn10434\\Desktop\\test_zx\\vscode_zx\\test3.txt'
-    #arg_data['input'] = None
-    #arg_data['start_addr'] = 32769
-    #arg_data['name'] = 'PaletteCycle.bin'
-    #arg_data['output'] = 'D:\\dn10434\\Desktop\\test_zx\\vscode_zx\\testn.bas'
 
     if arg_data['input']:
         with open(arg_data['input'], 'r') as f:
@@ -172,6 +166,8 @@ def preproc(line):
     """Does some pre-processing on a BASIC line"""
 
     new_line = ''
+
+    # Detect if quoted
     b_quote = False
     for letter in line:
         if letter == '""':
@@ -187,14 +183,26 @@ def preproc(line):
             new_line += letter
             next
 
-        if letter in ';:,':
+        # Expand if a separator character and not quoted
+        if letter in ';:,#':
             new_line += ' {0} '.format(letter)
         else:
             new_line += letter
 
     arr_line = shlex.split(new_line, posix=False)
 
-    return arr_line
+    arr_result = []
+    # Special cases: OPEN# and CLOSE#
+    for word in arr_line:
+        if word == '#' and len(arr_result) > 1:
+            if arr_result[-1].upper() in ['OPEN', 'CLOSE']:
+                arr_result[-1] = arr_result[-1] + word
+            else:
+                arr_result.append(word)
+        else:
+            arr_result.append(word)
+
+    return arr_result
 
 
 def fp(x):
