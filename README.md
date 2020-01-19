@@ -1,6 +1,15 @@
 # vscode_zx
 
-Visual Studio Tasks and Scripts for NextBASIC and ZX Basic
+Visual Studio Code Tasks and Scripts for NextBASIC and ZX Basic
+
+Features:
+
+- NextBASIC text to `.bas` file converter (work in progress)
+- Task support to compile with ZX Basic
+- Task integration to build (or convert) and run in ZEsarUX and CSpect emulators
+- Works with Windows, MacOS and (possibly) Linux
+
+Works best if used with [ZX Spectrum BASIC syntax highlighting for Visual Studio Code](https://github.com/jsanjose/zxbasic-vscode).
 
 ---
 
@@ -180,6 +189,15 @@ When the task is run, `Example.bas` and `Example.bin` will be copied, and also `
 
 Tareas y scripts de Visual Studio Code para el desarrollo en NextBASIC y ZX Basic
 
+Características:
+
+- Conversor de texto a ficheros `.bas` (en construcción)
+- Tareas para compilar con ZX Basic
+- Integración de tareas para compilar (o convertir) y ejecutar en los emuladores ZEsarUX y CSpect
+- Funciona en Windows, MacOS y (teóricamente) Linux
+
+Se recomienda usar junto con el plugin [ZX Spectrum BASIC syntax highlighting for Visual Studio Code](https://github.com/jsanjose/zxbasic-vscode).
+
 ## Castellano
 
 ### Software necesario
@@ -357,6 +375,8 @@ Al ejecutar la tarea, no sólo se copiarán en la SD los ficheros `Ejemplo.bas` 
 ## Copyright
 
 Copyright (c) 2020 kounch
+
+Some parts: Copyleft (K) 2008, Jose Rodriguez-Rosa (a.k.a. Boriel) <http://www.boriel.com>
 
 Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
 
