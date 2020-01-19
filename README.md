@@ -151,6 +151,31 @@ After running `Build ZX Basic` we will get:
 
 For each of the compiling options, there are also two other tasks named `Build ... And Run (CSpect)` and `Build ... And Run (ZEsarUX)` which can be used to compile, copy the new created files (`.bas` and, possibly, `.bin`) inside the virtual SD for the selected emulator, and then launch the emulator. If the `autoexec.bas` file has also been changed, a small BASIC program will start, where, pressing any key but BREAK will try to start the new program. If you press BREAK, ZX Next browser will be launched instead.
 
+Also, if a file `.filelist` is added, with the same name that the `.bas` file, and with the names of other files inside, the corresponding task will try to copy these files to the SD.
+
+For example, with a ZX Basic file and a `.filelist` file:
+
+       +--Projects/
+             |
+             +--.vscode/
+             |     |
+             |     +--tasks.json
+             |
+             +--Ejemplo.bas
+             +--Ejemplo.filelist
+             +--Imagen1.scr
+             +--Imagen2.scr
+             +--Pantalla.bmp
+             +--Pantalla2.bmp
+
+Where `Ejempo.filelist` has these contents:
+
+        Imagen1.scr
+        Imagen2.scr
+        Pantalla.bmp
+
+When the task is run, `Ejemplo.bas` and `Ejemplo.bin` will be copied, but also `Imagen1.scr`, `Imagen2.scr` and `Pantalla.bmp`. But `Pantalla2.bmp` *won't*.
+
 ---
 
 Tareas y scripts de Visual Studio Code para el desarrollo en NextBASIC y ZX Basic
@@ -196,7 +221,7 @@ Crear una estructura de directorios similar a la siguiente:
        +--txt2nextbasic.py
        +--zxb_build.sh  (zxb_build.bat en el caso de Windows)
 
-La carpeta Projects se puede renombrar, pero ha de estar al lado de `txt2nextbasic.py` y `zxb_build...`.
+La carpeta Projects se puede renombrar, pero *ha de estar* al lado de `txt2nextbasic.py` y `zxb_build...`.
 
 Descomprimir en `zxbasic` la distribución completa de ZX Basic, y luego copiar el archivo `nextlib.bas` (de `NextBuild-current.zip`: `NextBuildv5/ZXBC/library/`) en `zxbasic/library/`.
 
@@ -301,3 +326,28 @@ Los ficheros `.bas` no tienen por qué estar en la raíz del directorio `Project
 #### Compilación y ejecución en emulador
 
 Existen otras dos tareas llamadas `Build ... And Run (CSpect)` y `Build .. And Run (ZEsarUX)` que sirven para realizar una compilación, copiar los dos archivos (`.bin` y `.bas`) en la SD virtual del emulador correspondiente, y luego lanzarlo. Si, además, se ha configurado el archivo `autoexec.bas`, se iniciará directamente un programa donde, pulsando cualquier tecla, excepto BREAK (Mayúsculas + Espacio), se intentará ejecutar el programa compilado. Si se pulsa BREAK, se saldrá al navegador de ZX Next.
+
+Además, si se incluye un fichero `.filelist` con el mismo nombre que el fichero `.bas`, y con el nombre de otros ficheros dentro, la tarea intentará copiar también esos ficheros en la SD.
+
+Por ejemplo, partiendo de un fichero ZX Basic y un fichero `.filelist`:
+
+       +--Projects/
+             |
+             +--.vscode/
+             |     |
+             |     +--tasks.json
+             |
+             +--Ejemplo.bas
+             +--Ejemplo.filelist
+             +--Imagen1.scr
+             +--Imagen2.scr
+             +--Pantalla.bmp
+             +--Pantalla2.bmp
+
+Donde el fichero `Ejempo.filelist`tiene como contenido:
+
+        Imagen1.scr
+        Imagen2.scr
+        Pantalla.bmp
+
+Al ejecutar la tarea, no sólo se copiarán en la SD los ficheros `Ejemplo.bas` y `Ejemplo.bin`, sino que también se copiarán `Imagen1.scr`, `Imagen2.scr` y `Pantalla.bmp`, pero *no* se copiará `Pantalla2.bmp`.
