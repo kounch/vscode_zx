@@ -6,7 +6,7 @@ Visual Studio Tasks and Scripts for NextBASIC and ZX Basic
 
 ## English
 
-### Software needed
+### Software Requirements
 
 - **Visual Studio Code**. Docs, downloads, etc. [here](https://code.visualstudio.com/)
 
@@ -28,7 +28,7 @@ Visual Studio Tasks and Scripts for NextBASIC and ZX Basic
 
 #### Basic Install
 
-If it wasn't already, install Python 3. On Windows, make sure that `py launcher` is selected as install option.
+Install Python 3. On Windows, make sure that `py launcher` is selected as install option.
 
 Create a directory structure like this:
 
@@ -45,7 +45,7 @@ Create a directory structure like this:
        +--txt2nextbasic.py
        +--zxb_build.sh  (zxb_build.bat en el caso de Windows)
 
-Projects directory can be renamed, but it *must* be next to  `txt2nextbasic.py` y `zxb_build...`.
+`Projects` directory can be renamed, but it *must* be next to  `txt2nextbasic.py` y `zxb_build...`.
 
 Extract to `zxbasic` the full ZX Basic distribution, and then copy the file `nextlib.bas` (from `NextBuild-current.zip`: `NextBuildv5/ZXBC/library/`) to `zxbasic/library/`.
 
@@ -77,7 +77,7 @@ Now we have to set up the virtual SD card for each emulator.
 
 ##### CSpect configuration
 
-After obtaining an SD image, rename it as `systemnext.img`, and copy to `CSpect/` directory, with the files `enNextZX.rom` and `enNxtmmc.rom`. (Read [here](https://www.specnext.com/latestdistro/) and [here](http://www.zxspectrumnext.online/cspect/) to download).
+After obtaining an SD image file, rename it as `systemnext.img`, and copy to `CSpect/` directory, with the files `enNextZX.rom` and `enNxtmmc.rom`. (Read [here](https://www.specnext.com/latestdistro/) and [here](http://www.zxspectrumnext.online/cspect/) to download).
 
 Create the SD directory where the compiled software will be put:
 
@@ -99,7 +99,7 @@ The, create the structure in the virtual SD where the compiled software will be 
     cd /(...)/vscode_zx/
     hdfmonkey mkdir ./ZEsarUX/tbblue.mmc /devel
 
-If it's MacOS:
+If you are using MacOS:
 
     cd /(...)/vscode_zx/
     hdfmonkey mkdir ./ZEsarUX.app/Contents/Resources/tbblue.mmc /devel
@@ -128,7 +128,7 @@ For example, starting with this ZX Basic source file:
              |     |
              |     +--tasks.json
              |
-             +--Ejemplo.bas
+             +--Example.bas
 
 After running `Build ZX Basic` we will get:
 
@@ -138,12 +138,12 @@ After running `Build ZX Basic` we will get:
              |     |
              |     +--tasks.json
              |
-             +--Ejemplo.bas
+             +--Example.bas
              |
              +--build/
                   |
-                  +-Ejemplo.bas
-                  +-Ejemplo.bin
+                  +-Example.bas
+                  +-Example.bin
 
 `.bas` files do not neede to be created in the root of `Projects`, there can be as many subdirectories as you want.
 
@@ -161,20 +161,20 @@ For example, with a ZX Basic file and a `.filelist` file:
              |     |
              |     +--tasks.json
              |
-             +--Ejemplo.bas
-             +--Ejemplo.filelist
-             +--Imagen1.scr
-             +--Imagen2.scr
-             +--Pantalla.bmp
-             +--Pantalla2.bmp
+             +--Example.bas
+             +--Example.filelist
+             +--Image1.scr
+             +--Image2.scr
+             +--Screen.bmp
+             +--Screen2.bmp
 
-Where `Ejempo.filelist` has these contents:
+Where `Example.filelist` has these contents:
 
-        Imagen1.scr
-        Imagen2.scr
-        Pantalla.bmp
+        Image1.scr
+        Image2.scr
+        Screen.bmp
 
-When the task is run, `Ejemplo.bas` and `Ejemplo.bin` will be copied, but also `Imagen1.scr`, `Imagen2.scr` and `Pantalla.bmp`. But `Pantalla2.bmp` *won't*.
+When the task is run, `Example.bas` and `Example.bin` will be copied, and also `Image1.scr`, `Image2.scr` and `Screen.bmp`. But `Screen2.bmp` *won't*.
 
 ---
 
@@ -221,7 +221,7 @@ Crear una estructura de directorios similar a la siguiente:
        +--txt2nextbasic.py
        +--zxb_build.sh  (zxb_build.bat en el caso de Windows)
 
-La carpeta Projects se puede renombrar, pero *ha de estar* al lado de `txt2nextbasic.py` y `zxb_build...`.
+El directorio `Projects` se puede renombrar, pero *ha de estar* al lado de `txt2nextbasic.py` y `zxb_build...`.
 
 Descomprimir en `zxbasic` la distribución completa de ZX Basic, y luego copiar el archivo `nextlib.bas` (de `NextBuild-current.zip`: `NextBuildv5/ZXBC/library/`) en `zxbasic/library/`.
 
@@ -360,4 +360,4 @@ Copyright (c) 2020 kounch
 
 Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
 
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE
