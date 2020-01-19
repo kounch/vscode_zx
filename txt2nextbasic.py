@@ -72,21 +72,24 @@ def main():
     load_addr = 0x8000
     for line in code:
         line = line.strip()
-        if line[0] != '#':
+        if line[0] != '#':  #  Comments and directives aren't parsed
             arr_line = preproc(line)
             if arr_line:
                 n_line = None
+                # Detect line numbers
                 if arr_line[0].isdigit():
                     n_line = int(arr_line[0])
                     arr_line = arr_line[1:]
+                # Parse line
                 basic_data.add_line([arr_line], n_line)
         elif '#program' in line:
+            # Not implemented
             LOGGER.debug('Program Directive: {0}'.format(line))
         elif line == '#autostart':
             load_addr = 0
 
+    # Save bytes to file
     file_content = bytearray(basic_data.bytes)
-
     file_obj = Plus3DosFile(0, file_content, load_addr)
     with open(arg_data['output'], 'wb') as f:
         f.write(file_obj.make_bin())
@@ -189,6 +192,7 @@ def preproc(line):
         else:
             new_line += letter
 
+    # Convert to array of possible tokens
     arr_line = shlex.split(new_line, posix=False)
 
     arr_result = []
