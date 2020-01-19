@@ -198,6 +198,8 @@ Características:
 
 Se recomienda usar junto con el plugin [ZX Spectrum BASIC syntax highlighting for Visual Studio Code](https://github.com/jsanjose/zxbasic-vscode).
 
+---
+
 ## Castellano
 
 ### Software necesario
@@ -370,7 +372,7 @@ Donde el fichero `Ejempo.filelist`tiene como contenido:
 
 Al ejecutar la tarea, no sólo se copiarán en la SD los ficheros `Ejemplo.bas` y `Ejemplo.bin`, sino que también se copiarán `Imagen1.scr`, `Imagen2.scr` y `Pantalla.bmp`, pero *no* se copiará `Pantalla2.bmp`.
 
---
+---
 
 ## Copyright
 
