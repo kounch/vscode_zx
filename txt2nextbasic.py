@@ -58,38 +58,43 @@ def main():
 
     arg_data = parse_args()
 
-    if arg_data['input']:
-        with open(arg_data['input'], 'r') as f:
-            code = f.readlines()
-    else:
-        s_addr = arg_data['start_addr']
-        code = ['#autostart']
-        code += ['10 CLEAR {0}'.format(s_addr - 1)]
-        code += ['LOAD "{0}" CODE {1}'.format(arg_data['name'], s_addr)]
-        code += ['30 RANDOMIZE USR {0}'.format(s_addr)]
-
-    basic_data = Basic()
     load_addr = 0x8000
-    for line in code:
-        line = line.strip()
-        if line[0] != '#':  #  Comments and directives aren't parsed
-            arr_line = preproc(line)
-            if arr_line:
-                n_line = None
-                # Detect line numbers
-                if arr_line[0].isdigit():
-                    n_line = int(arr_line[0])
-                    arr_line = arr_line[1:]
-                # Parse line
-                basic_data.add_line([arr_line], n_line)
-        elif '#program' in line:
-            # Not implemented
-            LOGGER.debug('Program Directive: {0}'.format(line))
-        elif line == '#autostart':
-            load_addr = 0
+    if arg_data['is_binary']:
+        with open(arg_data['input'], 'rb') as f:
+            file_content = f.read()
+    else:
+        if arg_data['input_txt']:
+            with open(arg_data['input'], 'r') as f:
+                code = f.readlines()
+        else:
+            s_addr = arg_data['start_addr']
+            code = ['#autostart']
+            code += ['10 CLEAR {0}'.format(s_addr - 1)]
+            code += ['LOAD "{0}" CODE {1}'.format(arg_data['name'], s_addr)]
+            code += ['30 RANDOMIZE USR {0}'.format(s_addr)]
+
+        basic_data = Basic()
+        for line in code:
+            line = line.strip()
+            if line[0] != '#':  #  Comments and directives aren't parsed
+                arr_line = preproc(line)
+                if arr_line:
+                    n_line = None
+                    # Detect line numbers
+                    if arr_line[0].isdigit():
+                        n_line = int(arr_line[0])
+                        arr_line = arr_line[1:]
+                    # Parse line
+                    basic_data.add_line([arr_line], n_line)
+            elif '#program' in line:
+                # Not implemented
+                LOGGER.debug('Program Directive: {0}'.format(line))
+            elif line == '#autostart':
+                load_addr = 0
+
+        file_content = bytearray(basic_data.bytes)
 
     # Save bytes to file
-    file_content = bytearray(basic_data.bytes)
     file_obj = Plus3DosFile(0, file_content, load_addr)
     with open(arg_data['output'], 'wb') as f:
         f.write(file_obj.make_bin())
@@ -111,7 +116,7 @@ def parse_args():
                         '--name',
                         action='store',
                         dest='name',
-                        help='Binary Name')
+                        help='Destination Binary File Name')
     parser.add_argument('-o',
                         '--output',
                         action='store',
@@ -127,6 +132,11 @@ def parse_args():
                         action='store',
                         dest='input_path',
                         help='Input text file with BASIC code')
+    parser.add_argument('-b',
+                        '--binary',
+                        action='store_true',
+                        dest='is_binary',
+                        help='Input file is binary BASIC data')
 
     arguments = parser.parse_args()
 
@@ -148,6 +158,10 @@ def parse_args():
     if arguments.start_addr:
         s_addr = int(arguments.start_addr)
 
+    is_binary = False
+    if arguments.is_binary:
+        is_binary = True
+
     if i_path:
         if not i_path.exists():
             LOGGER.error('Path not found: %s', i_path)
@@ -161,6 +175,7 @@ def parse_args():
     values['input'] = i_path
     values['output'] = o_path
     values['start_addr'] = s_addr
+    values['is_binary'] = is_binary
 
     return values
 
