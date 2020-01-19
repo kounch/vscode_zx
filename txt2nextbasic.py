@@ -5,7 +5,7 @@
 """
 Text to ZX Basic File Converter for ZX Spectrum Next (+3e/ESXDOS compatible)
 
-    Copyright (c) 2017 @Kounch
+    Copyright (c) 2020 @Kounch
 
     BASIC parser modified from original version in ZX Basic libraries
     https://zxbasic.readthedocs.io/en/latest/
