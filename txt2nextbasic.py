@@ -202,7 +202,7 @@ def preproc(line):
             next
 
         # Expand if a separator character and not quoted
-        if letter in ';:,#':
+        if letter in ';:,#+-*/=&|^><%!()':
             new_line += ' {0} '.format(letter)
         else:
             new_line += letter
@@ -211,15 +211,17 @@ def preproc(line):
     arr_line = shlex.split(new_line, posix=False)
 
     arr_result = []
-    # Special cases: OPEN# and CLOSE#
+    # Special cases: OPEN#, CLOSE#, >>, <<
     for word in arr_line:
         if word == '#' and len(arr_result) > 1:
             if arr_result[-1].upper() in ['OPEN', 'CLOSE']:
                 arr_result[-1] = arr_result[-1] + word
-            else:
-                arr_result.append(word)
-        else:
-            arr_result.append(word)
+                continue
+        elif word in '><' and len(arr_result) > 1:
+            if arr_result[-1] == word:
+                arr_result[-1] = arr_result[-1] + word
+                continue
+        arr_result.append(word)
 
     return arr_result
 
