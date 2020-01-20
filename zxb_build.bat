@@ -63,6 +63,7 @@ IF /I "%MODE%"=="zxbasic" (
 
 IF /I "%MODE%"=="nextbasic" (
 	ECHO Converting %FILENAME%.bas...
+	mkdir "%FILEDIR%\build" 2>NUL
 	py -3 "%MYPATH%\txt2nextbasic.py" -i "%FULLFILE%" -o "%FILEDIR%\build\%FILENAME%.bas"
 	SET RETVAL=%ERRORLEVEL%
 	IF NOT %RETVAL% EQU 0 (
