@@ -63,7 +63,7 @@ def main():
         with open(arg_data['input'], 'rb') as f:
             file_content = f.read()
     else:
-        if arg_data['input_txt']:
+        if arg_data['input']:
             with open(arg_data['input'], 'r') as f:
                 code = f.readlines()
         else:
