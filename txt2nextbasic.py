@@ -76,7 +76,7 @@ def main():
         basic_data = Basic()
         for line in code:
             line = line.strip()
-            if line[0] != '#':  #  Comments and directives aren't parsed
+            if line and line[0] != '#':  #  Comments and directives aren't parsed
                 arr_line = preproc(line)
                 if arr_line:
                     n_line = None
@@ -520,12 +520,14 @@ class Basic(object):
             if isinstance(word, str):
                 if word.upper() in TOKENS:
                     result.extend([TOKENS[word.upper()]])
-                elif word[0] == '.':  # Extended dot command
+                elif word[0] == '.':
+                    # Extended dot command
                     word = ' {0} '.format(word)
                     result.extend(self.literal(word))
                 else:
                     result.extend(self.literal(word))
-            elif isinstance(word, float) or isinstance(word, int):  # A number?
+            elif isinstance(word, float) or isinstance(word,
+                                                        int):  # A number?
                 result.extend(self.number(word))
             else:
                 result.extend(word)  # Must be another thing
