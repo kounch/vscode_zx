@@ -507,31 +507,28 @@ class Basic(object):
         """
 
         result = []
-        if sentence[0][0] == '.':
-            # Extended dot command
-            word = ' {0}'.format(' '.join(sentence))
-            result.extend(self.literal(word))
-        else:
-            for i in sentence:
-                LOGGER.debug('word: {0}'.format(i))
+        for i in sentence:
+            LOGGER.debug('word: {0}'.format(i))
+            try:
+                word = int(i)
+            except:
                 try:
-                    word = int(i)
+                    word = float(i)
                 except:
-                    try:
-                        word = float(i)
-                    except:
-                        word = i
+                    word = i
 
-                if isinstance(word, str):
-                    if word.upper() in TOKENS:
-                        result.extend([TOKENS[word.upper()]])
-                    else:
-                        result.extend(self.literal(word))
-                elif isinstance(word, float) or isinstance(word,
-                                                           int):  # A number?
-                    result.extend(self.number(word))
+            if isinstance(word, str):
+                if word.upper() in TOKENS:
+                    result.extend([TOKENS[word.upper()]])
+                elif word[0] == '.':  # Extended dot command
+                    word = ' {0} '.format(word)
+                    result.extend(self.literal(word))
                 else:
-                    result.extend(word)  # Must be another thing
+                    result.extend(self.literal(word))
+            elif isinstance(word, float) or isinstance(word, int):  # A number?
+                result.extend(self.number(word))
+            else:
+                result.extend(word)  # Must be another thing
 
         return result
 
