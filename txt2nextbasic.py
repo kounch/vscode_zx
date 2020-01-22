@@ -35,6 +35,7 @@ import os
 import argparse
 import logging
 import shlex
+import re
 
 try:
     from pathlib import Path
@@ -55,7 +56,7 @@ LOGGER.addHandler(LOG_STREAM)
 
 def main():
     """Main Routine"""
-
+    
     arg_data = parse_args()
 
     load_addr = 0x8000
@@ -184,10 +185,26 @@ def parse_args():
 def preproc(line):
     """Does some pre-processing on a BASIC line"""
 
-    new_line = ''
+    # Detect ; comments
+    comment = ''
+    # Comments at start of line
+    det_comm = re.compile('(\\s*\\d*)\\s*(;.*)')
+    match_comm = det_comm.match(line)
+    if match_comm:
+        line = match_comm.group(1)
+        comment = match_comm.group(2)
+    else:
+        # Comments after :
+        det_comm = re.compile('(.*:)\\s*(;.*)')
+        match_comm = det_comm.match(line)
+        if match_comm:
+            line = match_comm.group(1)
+            comment = match_comm.group(2)
 
     # Detect if quoted
     b_quote = False
+
+    new_line = ''
     for letter in line:
         if letter == '"':
             if b_quote:
@@ -232,6 +249,9 @@ def preproc(line):
                 continue
 
         arr_result.append(word)
+
+    if comment:
+        arr_result.append(comment)
 
     return arr_result
 
