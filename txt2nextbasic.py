@@ -76,7 +76,8 @@ def main():
         basic_data = Basic()
         for line in code:
             line = line.strip()
-            if line and line[0] != '#':  #  Comments and directives aren't parsed
+            if line and line[
+                    0] != '#':  #  Comments and directives aren't parsed
                 arr_line = preproc(line)
                 if arr_line:
                     n_line = None
@@ -188,20 +189,20 @@ def preproc(line):
     # Detect if quoted
     b_quote = False
     for letter in line:
-        if letter == '""':
+        if letter == '"':
             if b_quote:
                 b_quote = False
             else:
                 b_quote = True
 
             new_line += letter
-            next
+            continue
 
         if b_quote:
             new_line += letter
-            next
+            continue
 
-        # Expand if a separator character and not quoted
+        # Expand if it's a separator character and unquoted
         if letter in ';:,#+-*/=&|^><%!()':
             new_line += ' {0} '.format(letter)
         else:
@@ -211,7 +212,7 @@ def preproc(line):
     arr_line = shlex.split(new_line, posix=False)
 
     arr_result = []
-    # Special cases: OPEN#, CLOSE#, >>, <<
+    # Special cases: OPEN#, CLOSE#, >>, <<, DEF FN, GO TO, GO SUB
     for word in arr_line:
         if word == '#' and len(arr_result) > 1:
             if arr_result[-1].upper() in ['OPEN', 'CLOSE']:
@@ -221,6 +222,15 @@ def preproc(line):
             if arr_result[-1] == word:
                 arr_result[-1] = arr_result[-1] + word
                 continue
+        elif word == 'FN' and len(arr_result) > 1:
+            if arr_result[-1].upper() == 'DEF':
+                arr_result[-1] = arr_result[-1] + ' {0}'.format(word)
+                continue
+        elif word in ['TO', 'SUB'] and len(arr_result) > 1:
+            if arr_result[-1].upper() == 'GO':
+                arr_result[-1] = arr_result[-1] + ' {0}'.format(word)
+                continue
+
         arr_result.append(word)
 
     return arr_result
@@ -518,19 +528,17 @@ class Basic(object):
                     word = i
 
             if isinstance(word, str):
-                if word.upper() in TOKENS:
+                if word.upper() in TOKENS:  # A token
                     result.extend([TOKENS[word.upper()]])
-                elif word[0] == '.':
-                    # Extended dot command
+                elif word[0] == '.':  # Extended dot command
                     word = ' {0} '.format(word)
                     result.extend(self.literal(word))
-                else:
+                else:  # Plain text
                     result.extend(self.literal(word))
-            elif isinstance(word, float) or isinstance(word,
-                                                        int):  # A number?
+            elif isinstance(word, float) or isinstance(word, int):  # A number?
                 result.extend(self.number(word))
             else:
-                result.extend(word)  # Must be another thing
+                result.extend(word)  # Another thing
 
         return result
 
@@ -670,7 +678,7 @@ TOKENS = {
     'DIM': 233,
     'REM': 234,
     'FOR': 235,
-    'GOTO': 236,
+    'GO TO': 236,
     'GO SUB': 237,
     'INPUT': 238,
     'LOAD': 239,
