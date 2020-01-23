@@ -3,7 +3,7 @@
 # -*- mode: Python; tab-width: 4; indent-tabs-mode: nil; -*-
 # Do not change the previous lines. See PEP 8, PEP 263.
 """
-Text to NextBasic File Converter for ZX Spectrum Next (+3e/ESXDOS compatible)
+Text to NextBASIC File Converter for ZX Spectrum Next (+3e/ESXDOS compatible)
 
     Copyright (c) 2020 @Kounch
 
@@ -108,7 +108,7 @@ def main():
 def parse_args():
     """Command Line Parser"""
 
-    parser = argparse.ArgumentParser(description='ZX Binary Loader Maker')
+    parser = argparse.ArgumentParser(description='Text to NextBASIC Converter')
     parser.add_argument('-v',
                         '--version',
                         action='version',

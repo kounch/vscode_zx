@@ -5,6 +5,7 @@ Visual Studio Code Tasks and Scripts for NextBASIC and ZX Basic
 Features:
 
 - NextBASIC text to `.bas` file converter (work in progress)
+- NextBASIC text renumbering (work in progress too)
 - Task support to compile with ZX Basic
 - Task integration to build (or convert) and run in ZEsarUX and CSpect emulators
 - Works with Windows, MacOS and (possibly) Linux
@@ -51,10 +52,12 @@ Create a directory structure like this:
        |           |
        |           +--tasks.json
        |
+       +--rennextbasic.py
        +--txt2nextbasic.py
-       +--zxb_build.sh  (zxb_build.bat en el caso de Windows)
+       +--zxn_renumber.sh (zxn_renumber.bat on Windows)
+       +--zxb_build.sh  (zxb_build.bat on Windows)
 
-`Projects` directory can be renamed, but it *must* be next to  `txt2nextbasic.py` y `zxb_build...`.
+`Projects` directory can be renamed, but it *must* be next to  `txt2nextbasic.py`, `rennextbasic.py`, `zxb_build...` and `zxn_renumber...`.
 
 Extract to `zxbasic` the full ZX Basic distribution, and then copy the file `nextlib.bas` (from `NextBuild-current.zip`: `NextBuildv5/ZXBC/library/`) to `zxbasic/library/`.
 
@@ -75,7 +78,9 @@ If you also want the option to compile and launch with the emulators, expand the
        |           |
        |           +--tasks.json
        |
+       +--rennextbasic.py
        +--txt2nextbasic.py
+       +--zxn_renumber.sh (zxn_renumber.bat for Windows)
        +--zxb_build.sh  (zxb_build.bat for Windows)
        |
        +--hdfmonkey  (hdfmonkey.exe for Windows)
@@ -123,11 +128,17 @@ On MacOS:
 
 ### How to use
 
+#### Renumbering
+
+Open the directory "Projects" with Visual Studio Code.
+
+The `tasks.json` file creates a Visual Studio Code task named `Renumber NextBASIC`. When invoked with a `.bas` text file selected, tries to renumber the source code content.
+
 #### Compiling
 
 Open the directory "Projects" with Visual Studio Code.
 
-The `tasks.json` file creates a couple of Visual Studio Code tasks named `Build ZX Basic` and `Build NextBASIC` that, when invoked with a `.bas` file selected,creates a `build` directory and, inside of this, a `.bin` file with the compiled program if ZX Basic was selected, or a `.bas` file if NextBASIC. Also, in the case of ZX Basic, a launcher  `.bas` file is created, so it can be launched from the ZX Next Browser, ESXDOS o +3e DOS.
+The `tasks.json` file creates a couple of Visual Studio Code tasks named `Build ZX Basic` and `Build NextBASIC` that, when invoked with a `.bas` text file selected, creates a `build` directory and, inside of this, a `.bin` file with the compiled program if ZX Basic was selected, or a `.bas` file if NextBASIC. Also, in the case of ZX Basic, a launcher  `.bas` file is created, so it can be launched from the ZX Next Browser, ESXDOS o +3e DOS.
 
 For example, starting with this ZX Basic source file:
 
@@ -191,7 +202,8 @@ Tareas y scripts de Visual Studio Code para el desarrollo en NextBASIC y ZX Basi
 
 Características:
 
-- Conversor de texto a ficheros `.bas` (en construcción)
+- Conversor de texto a ficheros `.bas` de NextBASIC (en construcción)
+- Función para volver a numerar un listado de NextBASIC (en construcción también)
 - Tareas para compilar con ZX Basic
 - Integración de tareas para compilar (o convertir) y ejecutar en los emuladores ZEsarUX y CSpect
 - Funciona en Windows, MacOS y (teóricamente) Linux
@@ -238,7 +250,9 @@ Crear una estructura de directorios similar a la siguiente:
        |           |
        |           +--tasks.json
        |
+       +--rennextbasic.py
        +--txt2nextbasic.py
+       +--zxn_renumber.sh (zxn_renumber.bat si es Windows)
        +--zxb_build.sh  (zxb_build.bat en el caso de Windows)
 
 El directorio `Projects` se puede renombrar, pero *ha de estar* al lado de `txt2nextbasic.py` y `zxb_build...`.
@@ -262,8 +276,10 @@ Si se desea tener también la opción de compilar y lanzar en los emuladores, am
        |           |
        |           +--tasks.json
        |
+       +--rennextbasic.py
        +--txt2nextbasic.py
-       +--zxb_build.sh  (zxb_build.bat en el caso de Windows)
+       +--zxn_renumber.sh (zxn_renumber.bat en Windows)
+       +--zxb_build.sh  (zxb_build.bat para Windows)
        |
        +--hdfmonkey  (hdfmonkey.exe en el caso de Windows)
 
@@ -310,11 +326,17 @@ En el caso de MacOS
 
 ### Uso
 
+#### Numeración de líneas
+
+Abrir el directorio "Projects" (o con el nombre que se haya definido) desde Visual Studio Code.
+
+El fichero `tasks.json` define una tarea de Visual Studio Code `Renumber NextBASIC` que, al ser invocada sobre un fichero `.bas` de texto, intentará ajustar de forma automática todos los números de línea del código.
+
 #### Compilación
 
 Abrir el directorio "Projects" (o con el nombre que se haya definido) desde Visual Studio Code.
 
-El fichero `tasks.json` define varia tareas de Visual Studio Code `Build ZX Basic` y `Build NextBASIC` que, al ser invocadas sobre un fichero `.bas`, creará un directorio `build` y, dentro de este, en el caso de NextBASIC, un fichero `.bas` con el programa y, en el caso de ZX Basic, un fichero `.bin` con el programa compilado, y un lanzador `.bas` para poder iniciarlo desde el navegador de ZX Next, ESXDOS o +3e DOS.
+El fichero `tasks.json` define varias tareas de Visual Studio Code `Build ZX Basic` y `Build NextBASIC` que, al ser invocadas sobre un fichero `.bas` de texto con código, creará un directorio `build` y, dentro de este, en el caso de NextBASIC, un fichero `.bas` con el programa y, en el caso de ZX Basic, un fichero `.bin` con el programa compilado, y un lanzador `.bas` para poder iniciarlo desde el navegador de ZX Next, ESXDOS o +3e DOS.
 
 Por ejemplo, partiendo de un fichero ZX Basic:
 

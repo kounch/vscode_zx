@@ -3,7 +3,7 @@
 # -*- mode: Python; tab-width: 4; indent-tabs-mode: nil; -*-
 # Do not change the previous lines. See PEP 8, PEP 263.
 """
-Text NextBasic Renumbering
+Text NextBASIC Renumbering
 
     Copyright (c) 2020 @Kounch
 
@@ -156,7 +156,7 @@ def main():
 def parse_args():
     """Command Line Parser"""
 
-    parser = argparse.ArgumentParser(description='NextBasic TXT Renumber')
+    parser = argparse.ArgumentParser(description='NextBASIC TXT Renumber')
     parser.add_argument('-v',
                         '--version',
                         action='version',
