@@ -3,7 +3,7 @@
 # -*- mode: Python; tab-width: 4; indent-tabs-mode: nil; -*-
 # Do not change the previous lines. See PEP 8, PEP 263.
 """
-Text to ZX Basic File Converter for ZX Spectrum Next (+3e/ESXDOS compatible)
+Text to NextBasic File Converter for ZX Spectrum Next (+3e/ESXDOS compatible)
 
     Copyright (c) 2020 @Kounch
 
@@ -39,7 +39,6 @@ import re
 
 try:
     from pathlib import Path
-    Path().expanduser()
 except (ImportError, AttributeError):
     from pathlib2 import Path
 
