@@ -197,8 +197,10 @@ def preproc(line):
         det_comm = re.compile('(.*:)\\s*(;.*)')
         match_comm = det_comm.match(line)
         if match_comm:
-            line = match_comm.group(1)
-            comment = match_comm.group(2)
+            n_line = match_comm.group(1)
+            if n_line.count('"') % 2 == 0:  # Not between quotes
+                line = n_line
+                comment = match_comm.group(2)
 
     # Detect if quoted
     b_quote = False
