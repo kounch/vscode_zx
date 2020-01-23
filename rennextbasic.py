@@ -99,45 +99,45 @@ def main():
         new_lines = []
         for line in code:
             test_line = line.strip()
-            if test_line and test_line[
-                    0] == '#':  # Lines with only comments and directives aren't parsed
-                new_lines.append(line)
-            else:
-                # Split line number and content
-                det_comm = re.compile('(\\s*\\d+)\\s*(.*)')
-                match_comm = det_comm.match(line)
-                if match_comm:
-                    l_number = int(match_comm.group(1).strip())
-                    l_text = match_comm.group(2)
-
-                new_number = arr_lines[l_number][0]
-                new_line = '{0:>4} '.format(new_number)
-
-                # Find GO TO, GO SUB, SAVE or RESTORE
-                arr_match = [
-                    '(.*\\s*go\\s+to\\s+)(\\d+)(.*)',
-                    '(.*\\s*go\\s+sub\\s+)(\\d+)(.*)',
-                    '(.*save\\s*".*"\\s*line\\s*)',
-                    '(.*\\s*restore\\s+)(\\d+)(.*)',
-                ]
-                for str_match in arr_match:
-                    det_comm = re.compile(str_match, re.IGNORECASE)
-                    match_comm = det_comm.match(l_text)
+            if test_line:
+                if test_line[
+                        0] == '#':  # Lines with only comments and directives aren't parsed
+                    new_lines.append(line)
+                else:
+                    # Split line number and content
+                    det_comm = re.compile('(\\s*\\d+)\\s*(.*)')
+                    match_comm = det_comm.match(line)
                     if match_comm:
-                        old_number = int(match_comm.group(2))
-                        if old_number in arr_lines:
-                            new_number = arr_lines[old_number][0]
-                            l_text = '{0}'.format(match_comm.group(1))
-                            l_text += '{0}{1}'.format(new_number,
-                                                      match_comm.group(3))
-                        else:
-                            LOGGER.error(
-                                'Line not found!: {0} in line {1}({2})'.format(
-                                    old_number, l_number, new_number))
+                        l_number = int(match_comm.group(1).strip())
+                        l_text = match_comm.group(2)
 
-                new_line += l_text + '\n'
+                    new_number = arr_lines[l_number][0]
+                    new_line = '{0:>4} '.format(new_number)
 
-                new_lines.append(new_line)
+                    # Find GO TO, GO SUB, SAVE or RESTORE
+                    arr_match = [
+                        '(.*\\s*go\\s+to\\s+)(\\d+)(.*)',
+                        '(.*\\s*go\\s+sub\\s+)(\\d+)(.*)',
+                        '(.*save\\s*".*"\\s*line\\s*)',
+                        '(.*\\s*restore\\s+)(\\d+)(.*)',
+                    ]
+                    for str_match in arr_match:
+                        det_comm = re.compile(str_match, re.IGNORECASE)
+                        match_comm = det_comm.match(l_text)
+                        if match_comm:
+                            old_number = int(match_comm.group(2))
+                            if old_number in arr_lines:
+                                new_number = arr_lines[old_number][0]
+                                l_text = '{0}'.format(match_comm.group(1))
+                                l_text += '{0}{1}'.format(
+                                    new_number, match_comm.group(3))
+                            else:
+                                LOGGER.error(
+                                    'Line not found!: {0} in line {1}({2})'.
+                                    format(old_number, l_number, new_number))
+
+                    new_line += l_text + '\n'
+                    new_lines.append(new_line)
 
         if arg_data['output']:
             output_file = arg_data['output']
