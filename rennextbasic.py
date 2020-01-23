@@ -113,22 +113,27 @@ def main():
                 new_number = arr_lines[l_number][0]
                 new_line = '{0:>4} '.format(new_number)
 
-                # Find GO TO, GO SUB or SAVE
-                det_comm = re.compile(
-                    '(.*\\s*go\\s+(?:to|sub)\\s+|.*save\\s*".*"\\s*line\\s*)(\\d+)(.*)',
-                    re.IGNORECASE)
-                match_comm = det_comm.match(l_text)
-                if match_comm:
-                    old_number = int(match_comm.group(2))
-                    if old_number in arr_lines:
-                        new_number = arr_lines[old_number][0]
-                        l_text = '{0}'.format(match_comm.group(1))
-                        l_text += '{0}{1}'.format(new_number,
-                                                  match_comm.group(3))
-                    else:
-                        LOGGER.error(
-                            'Line not found!: {0} in line {1}({2})'.format(
-                                old_number, l_number, new_number))
+                # Find GO TO, GO SUB, SAVE or RESTORE
+                arr_match = [
+                    '(.*\\s*go\\s+to\\s+)(\\d+)(.*)',
+                    '(.*\\s*go\\s+sub\\s+)(\\d+)(.*)',
+                    '(.*save\\s*".*"\\s*line\\s*)',
+                    '(.*\\s*restore\\s+)(\\d+)(.*)',
+                ]
+                for str_match in arr_match:
+                    det_comm = re.compile(str_match, re.IGNORECASE)
+                    match_comm = det_comm.match(l_text)
+                    if match_comm:
+                        old_number = int(match_comm.group(2))
+                        if old_number in arr_lines:
+                            new_number = arr_lines[old_number][0]
+                            l_text = '{0}'.format(match_comm.group(1))
+                            l_text += '{0}{1}'.format(new_number,
+                                                      match_comm.group(3))
+                        else:
+                            LOGGER.error(
+                                'Line not found!: {0} in line {1}({2})'.format(
+                                    old_number, l_number, new_number))
 
                 new_line += l_text + '\n'
 
