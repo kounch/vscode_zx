@@ -38,6 +38,22 @@
             "problemMatcher": []
         },
         {
+            "label": "Renumber NextBASIC",
+            "type": "shell",
+            "command": "${workspaceFolder}/../zxn_renumber.sh",
+            "windows": {
+              "command": "${workspaceFolder}\\..\\zxn_renumber.bat"
+            },
+            "args": [
+                "${file}"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        },
+        {
             "label": "Build ZX Basic And Run (CSpect)",
             "type": "shell",
             "command": "${workspaceFolder}/../zxb_build.sh",
