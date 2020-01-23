@@ -46,11 +46,10 @@ fi
 
 echo "Renumbering $filename.bas..."
 "$python3bin" "$mypath/rennextbasic.py" -i "$fullfile"
-	retval=$?
-	if [ $retval != 0 ]; then
-		echo "Renumbering Error!!!"
-		exit $retVal
-	fi
+retval=$?
+if [ $retval != 0 ]; then
+	echo "Renumbering Error!!!"
+	exit $retVal
 fi
 
 echo "Done"
