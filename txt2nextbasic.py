@@ -42,7 +42,7 @@ try:
 except (ImportError, AttributeError):
     from pathlib2 import Path
 
-__MY_VERSION__ = '0.1'
+__MY_VERSION__ = '0.2'
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
@@ -55,7 +55,7 @@ LOGGER.addHandler(LOG_STREAM)
 
 def main():
     """Main Routine"""
-    
+
     arg_data = parse_args()
 
     load_addr = 0x8000
@@ -76,6 +76,7 @@ def main():
         basic_data = Basic()
         for line in code:
             line = line.strip()
+            arr_line = line.split()
             if line and line[
                     0] != '#':  #  Comments and directives aren't parsed
                 arr_line = preproc(line)
@@ -87,12 +88,16 @@ def main():
                         arr_line = arr_line[1:]
                     # Parse line
                     basic_data.add_line([arr_line], n_line)
-            elif '#program' in line:
-                # Not implemented
-                LOGGER.debug('Program Directive: {0}'.format(line))
-            elif line == '#autostart':
-                load_addr = 0
-
+            elif line.startswith('#program'):
+                if not arg_data['output']:
+                    if len(arr_line) > 1:
+                        arg_data['output'] = arg_data['input'].with_name(
+                            arr_line[1] + '.bas')
+            elif line.startswith('#autostart'):
+                if len(arr_line) > 1:
+                    load_addr = int(arr_line[1])
+                else:
+                    load_addr = 0
         file_content = bytearray(basic_data.bytes)
 
     # Save bytes to file
