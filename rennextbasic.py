@@ -32,7 +32,7 @@ try:
 except (ImportError, AttributeError):
     from pathlib2 import Path
 
-__MY_VERSION__ = '0.1'
+__MY_VERSION__ = '0.2'
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
@@ -102,7 +102,19 @@ def main():
             if test_line:
                 if test_line[
                         0] == '#':  # Lines with only comments and directives aren't parsed
-                    new_lines.append(line)
+                    l_text = line
+                    if test_line.startswith('#autostart '):
+                        # Split line number and content
+                        det_comm = re.compile('(#autostart\\s+)(\\d+)(.*)')
+                        match_comm = det_comm.match(line)
+                        if match_comm:
+                            old_number = int(match_comm.group(2))
+                            new_number = arr_lines[old_number][0]
+                            l_text = '{0}'.format(match_comm.group(1))
+                            l_text += '{0}'.format(new_number)
+                            l_text += '{0}\n'.format(match_comm.group(3))
+
+                    new_lines.append(l_text)
                 else:
                     # Split line number and content
                     det_comm = re.compile('(\\s*\\d+)\\s*(.*)')
