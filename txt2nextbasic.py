@@ -36,13 +36,15 @@ import argparse
 import logging
 import shlex
 import re
+import gettext
 
 try:
     from pathlib import Path
 except (ImportError, AttributeError):
     from pathlib2 import Path
 
-__MY_VERSION__ = '0.2'
+__MY_NAME__ = 'txt2nextbasic.py'
+__MY_VERSION__ = '0.3'
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
@@ -51,6 +53,12 @@ LOG_FORMAT = logging.Formatter(
 LOG_STREAM = logging.StreamHandler(sys.stdout)
 LOG_STREAM.setFormatter(LOG_FORMAT)
 LOGGER.addHandler(LOG_STREAM)
+
+path_locale = os.path.dirname(__file__)
+path_locale = os.path.join(path_locale, 'locale')
+gettext.bindtextdomain(__MY_NAME__, localedir=path_locale)
+gettext.textdomain(__MY_NAME__)
+_ = gettext.gettext
 
 
 def main():
@@ -135,6 +143,7 @@ def parse_args():
                         help='Machine Code Start Address')
     parser.add_argument('-i',
                         '--input',
+                        required=True,
                         action='store',
                         dest='input_path',
                         help='Input text file with BASIC code')
@@ -170,12 +179,16 @@ def parse_args():
 
     if i_path:
         if not i_path.exists():
-            LOGGER.error('Path not found: %s', i_path)
-            raise IOError('Input path does not exist!')
+            str_msg = _('Path not found: {0}')
+            LOGGER.error(str_msg.format(i_path))
+            str_msg = _('Input path does not exist!')
+            raise IOError(str_msg)
     else:
         if not b_name:
-            LOGGER.error('A binary name is required!')
-            raise ValueError('No name!')
+            str_msg = _('A binary name is required!')
+            LOGGER.error(str_msg)
+            str_msg = _('No name!')
+            raise ValueError(str_msg)
 
     values['name'] = b_name
     values['input'] = i_path
@@ -544,7 +557,6 @@ class Basic(object):
 
         result = []
         for i in sentence:
-            LOGGER.debug('word: {0}'.format(i))
             try:
                 word = int(i)
             except:

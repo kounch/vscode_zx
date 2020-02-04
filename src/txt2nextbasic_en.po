@@ -1,0 +1,30 @@
+# txtnextbasic.py
+# Copyright (C) 2020 kounch
+# This file is distributed under the same license as the PACKAGE vscode_zx.
+# FIRST AUTHOR @Kounch, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: txt2nextbasic.py 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-02-04 19:40+0100\n"
+"PO-Revision-Date: 2020-02-04 19:40+0100\n"
+"Last-Translator: @kounch\n"
+"Language-Team: EN\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Path not found: {0}"
+msgstr "Path not found: {0}"
+
+msgid "Input path does not exist!"
+msgstr "Input path does not exist!"
+
+msgid "A binary name is required!"
+msgstr "A binary name is required!"
+
+msgid "No name!"
+msgstr "No name!"
