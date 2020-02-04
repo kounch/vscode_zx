@@ -26,13 +26,15 @@ import os
 import argparse
 import logging
 import re
+import gettext
 
 try:
     from pathlib import Path
 except (ImportError, AttributeError):
     from pathlib2 import Path
 
-__MY_VERSION__ = '0.2'
+__MY_NAME__ = 'rennextbasic.py'
+__MY_VERSION__ = '0.3'
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
@@ -41,6 +43,12 @@ LOG_FORMAT = logging.Formatter(
 LOG_STREAM = logging.StreamHandler(sys.stdout)
 LOG_STREAM.setFormatter(LOG_FORMAT)
 LOGGER.addHandler(LOG_STREAM)
+
+path_locale = os.path.dirname(__file__)
+path_locale = os.path.join(path_locale, 'locale')
+gettext.bindtextdomain(__MY_NAME__, localedir=path_locale)
+gettext.textdomain(__MY_NAME__)
+_ = gettext.gettext
 
 
 def main():
@@ -65,10 +73,11 @@ def main():
                 if l_number not in arr_lines:
                     arr_lines[l_number] = [0, l_text]
                 else:
-                    LOGGER.error(
-                        'Duplicated line number: {0}'.format(l_number))
+                    str_msg = _('Duplicated line number: {0}')
+                    LOGGER.error(str_msg.format(l_number))
             else:
-                LOGGER.warn('Line number not found: ´{0}'.format(line))
+                str_msg = _('Line number not found: {0}')
+                LOGGER.warn(str_msg.format(line))
 
     max_lines = len(arr_lines.keys())
     if max_lines < 1000:
@@ -81,8 +90,8 @@ def main():
         n_step = 1
 
     if arg_data['step'] > n_step:
-        LOGGER.warn('Too many lines ({0})!. Step changed to: ´{1}'.format(
-            max_lines, n_step))
+        str_msg = _('Too many lines ({0})!. Step changed to: {1}')
+        LOGGER.warn(str_msg.format(max_lines, n_step))
     else:
         n_step = arg_data['step']
 
@@ -144,9 +153,11 @@ def main():
                                 l_text += '{0}{1}'.format(
                                     new_number, match_comm.group(3))
                             else:
+                                str_msg = _(
+                                    'Line not found!: {0} in line {1}({2})')
                                 LOGGER.error(
-                                    'Line not found!: {0} in line {1}({2})'.
-                                    format(old_number, l_number, new_number))
+                                    str_msg.format(old_number, l_number,
+                                                   new_number))
 
                     new_line += l_text + '\n'
                     new_lines.append(new_line)
@@ -163,7 +174,8 @@ def main():
             f.writelines(new_lines)
 
     else:
-        LOGGER.debug('Nothing to do')
+        str_msg = _('Nothing to do')
+        LOGGER.debug(str_msg)
 
 
 # Functions
@@ -172,6 +184,9 @@ def main():
 
 def parse_args():
     """Command Line Parser"""
+    str_hlp_input = _('Input text file with BASIC code')
+    str_hlp_output = _('Output file path')
+    str_hlp_steps = _('Line number step size')
 
     parser = argparse.ArgumentParser(description='NextBASIC TXT Renumber')
     parser.add_argument('-v',
@@ -180,19 +195,20 @@ def parse_args():
                         version='%(prog)s {}'.format(__MY_VERSION__))
     parser.add_argument('-i',
                         '--input',
+                        required=True,
                         action='store',
                         dest='input_path',
-                        help='Input text file with BASIC code')
+                        help=str_hlp_input)
     parser.add_argument('-o',
                         '--output',
                         action='store',
                         dest='output_path',
-                        help='Output file path')
+                        help=str_hlp_output)
     parser.add_argument('-s',
                         '--step',
                         action='store',
                         dest='step',
-                        help='Line number step size')
+                        help=str_hlp_steps)
 
     arguments = parser.parse_args()
 
@@ -211,8 +227,10 @@ def parse_args():
         step = int(arguments.step)
 
     if not i_path.exists():
-        LOGGER.error('Path not found: %s', i_path)
-        raise IOError('Input path does not exist!')
+        str_msg = _('Path not found: {0}')
+        LOGGER.error(str_msg.format(i_path))
+        str_msg = _('Input path does not exist!')
+        raise IOError(str_msg)
 
     values['input'] = i_path
     values['output'] = o_path
