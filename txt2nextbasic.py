@@ -143,7 +143,7 @@ def parse_args():
                         help='Machine Code Start Address')
     parser.add_argument('-i',
                         '--input',
-                        required=True,
+                        required=False,
                         action='store',
                         dest='input_path',
                         help='Input text file with BASIC code')

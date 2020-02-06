@@ -104,7 +104,7 @@ shopt -u nocasematch
 
 shopt -s nocasematch
 if [[ $action == "runCspect" ]] || [[ $action == "runZEsarUX" ]]; then
-	echo $(gettext "Copying files")"
+	echo $(gettext "Copying files")
 	"$mypath/hdfmonkey" put "$imagepath" "$filedir/build/$filename.bas" /devel/test.bas
 	retval=$?
 	if [ $retval -ne 0 ]; then
