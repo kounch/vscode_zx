@@ -250,6 +250,8 @@ Crear una estructura de directorios similar a la siguiente:
        |           |
        |           +--tasks.json
        |
+       +--locale/
+       |
        +--rennextbasic.py
        +--txt2nextbasic.py
        +--zxn_renumber.sh (zxn_renumber.bat si es Windows)
@@ -275,6 +277,8 @@ Si se desea tener también la opción de compilar y lanzar en los emuladores, am
        |     +--.vscode/
        |           |
        |           +--tasks.json
+       |
+       +--locale/
        |
        +--rennextbasic.py
        +--txt2nextbasic.py
