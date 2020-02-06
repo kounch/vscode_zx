@@ -1,0 +1,36 @@
+# zxn_renumber.sh
+# Copyright (C) 2020 kounch
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR @Kounch, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: zxn_renumber.sh 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-02-06 17:47+0100\n"
+"PO-Revision-Date: 2020-02-06 17:47+0100\n"
+"Last-Translator: @kounch\n"
+"Language-Team: EN\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Not BAS"
+msgstr "ERROR!! Not a .bas file!!!"
+
+msgid "$fullfile Not Found"
+msgstr "ERROR!! $fullfile does not exist!!!"
+
+msgid "Python3 Not found"
+msgstr "ERROR!! Python 3 not found!!!"
+
+msgid "Renumbering $filename"
+msgstr "Renumbering $filename.bas..."
+
+msgid "Cant Renumber"
+msgstr "Renumbering Error!!!"
+
+msgid "Finished"
+msgstr "Done"

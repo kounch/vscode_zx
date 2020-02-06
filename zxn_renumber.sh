@@ -25,32 +25,42 @@ filedir=`dirname "$fullfile"`
 
 python3bin=python3
 
+if [ -x "$(command -v gettext)" ]; then
+	. gettext.sh
+	export TEXTDOMAIN=zxn_renumber.sh
+	export TEXTDOMAINDIR=$mypath/locale
+else
+	shopt -s expand_aliases
+	alias gettext='echo'
+	alias eval_gettext='eval echo'
+fi
+
 shopt -s nocasematch
 if [[ $extension != "bas" ]]; then
-	echo "ERROR!! Not a .bas file!!!"
+	echo $(gettext "ERROR: Not a .bas file")
 	exit 1
 fi
 shopt -u nocasematch
 
 if [ ! -f "$fullfile" ]; then
-	echo "ERROR!! $2 does not exist!!!"
+	echo $(eval_gettext "ERROR: \$fullfile Not Found")
 	exit 2
 fi
 
 "$python3bin" -V >/dev/null 2>&1
 retval=$?
 if [ $retval != 0 ]; then
-	echo "ERROR!! Python 3 not found!!!"
+	echo $(gettext "ERROR: Python3 Not found")
 	exit $retVal
 fi
 
-echo "Renumbering $filename.bas..."
+echo $(eval_gettext "Renumbering \$filename")
 "$python3bin" "$mypath/rennextbasic.py" -i "$fullfile"
 retval=$?
 if [ $retval != 0 ]; then
-	echo "Renumbering Error!!!"
+	echo $(gettext "Error while renumbering")
 	exit $retVal
 fi
 
-echo "Done"
+echo $(gettext "Finished")
 exit 0

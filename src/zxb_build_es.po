@@ -1,0 +1,69 @@
+# zxb_build.sh
+# Copyright (C) 2020 kounch
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR @Kounch, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: zxn_renumber.sh 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-02-06 17:47+0100\n"
+"PO-Revision-Date: 2020-02-06 17:47+0100\n"
+"Last-Translator: @kounch\n"
+"Language-Team: ES\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "ERROR: Not a .bas file"
+msgstr "ERROR!! No es un fichero .bas!!!"
+
+msgid "ERROR: $fullfile Not Found"
+msgstr "ERROR!! $fullfile no existe!!!"
+
+msgid "ERROR: Python3 Not found"
+msgstr "ERROR!! No se ha podido encontrar Python 3!!!"
+
+msgid "Compiling $filename"
+msgstr "Compilando $filename.bas..."
+
+msgid "Error while compiling"
+msgstr "Error en la compilación!!!"
+
+msgid "Creating Launcher"
+msgstr "Creando lanzador..."
+
+msgid "Error while creating launcher"
+msgstr "Error creando lanzador!!!"
+
+msgid "Converting $filename"
+msgstr "Convirtiendo $filename.bas..."
+
+msgid "Error while converting"
+msgstr "Error en la conversión!!!"
+
+msgid "Copying files"
+msgstr "Copiando archivos..."
+
+msgid "Copy Error ($filename.bas)"
+msgstr "Error en la copia!! ($filename.bas)"
+
+msgid "Copy Error ($filename.bin)"
+msgstr "Error en la copia!! ($filename.bin)"
+
+msgid "Copy Error ($line)"
+msgstr "Error en la copia!! ($line)"
+
+msgid "Running Cspect"
+msgstr "Ejecutando Cspect..."
+
+msgid "Emulator Error"
+msgstr "Error del emulador!!!"
+
+msgid "Running ZEsarUX"
+msgstr "Ejecutando ZEsarUX..."
+
+msgid "Finished"
+msgstr "Finalizado"
