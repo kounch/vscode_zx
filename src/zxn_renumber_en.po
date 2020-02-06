@@ -17,19 +17,19 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "Not BAS"
+msgid "ERROR: Not a .bas file"
 msgstr "ERROR!! Not a .bas file!!!"
 
-msgid "$fullfile Not Found"
+msgid "ERROR: $fullfile Not Found"
 msgstr "ERROR!! $fullfile does not exist!!!"
 
-msgid "Python3 Not found"
+msgid "ERROR: Python3 Not found"
 msgstr "ERROR!! Python 3 not found!!!"
 
 msgid "Renumbering $filename"
 msgstr "Renumbering $filename.bas..."
 
-msgid "Cant Renumber"
+msgid "Error while renumbering"
 msgstr "Renumbering Error!!!"
 
 msgid "Finished"
