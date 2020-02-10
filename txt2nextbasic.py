@@ -202,39 +202,23 @@ def parse_args():
 def preproc(line):
     """Does some pre-processing on a BASIC line"""
 
-    # Detect ; comments
+    # Detect ; and REM comments
     comment = ''
     # Comments at start of line
-    det_comm = re.compile('(\\s*\\d*)\\s*(;.*)')
+    det_comm = re.compile('(\\s*\\d*\\s*(?:;|REM\\s?))(.*)')
     match_comm = det_comm.match(line)
     if match_comm:
         line = match_comm.group(1)
         comment = match_comm.group(2)
     else:
         # Comments after :
-        det_comm = re.compile('(.*:)\\s*(;.*)')
+        det_comm = re.compile('(.*:\\s*(?:;|REM\\s?))(.*)')
         match_comm = det_comm.match(line)
         if match_comm:
             n_line = match_comm.group(1)
             if n_line.count('"') % 2 == 0:  # Not between quotes
                 line = n_line
                 comment = match_comm.group(2)
-
-    # Detect REM comments
-    if not comment:
-        det_comm = re.compile('(\\s*\\d*\\s*REM)\\s*(.*)')
-        match_comm = det_comm.match(line)
-        if match_comm:
-            line = match_comm.group(1)
-            comment = match_comm.group(2)
-        else:
-            det_comm = re.compile('(.*:\\s*REM)\\s*(.*)')
-            match_comm = det_comm.match(line)
-            if match_comm:
-                n_line = match_comm.group(1)
-                if n_line.count('"') % 2 == 0:  # Not between quotes
-                    line = n_line
-                    comment = match_comm.group(2)
 
     # Detect if quoted
     b_quote = False
