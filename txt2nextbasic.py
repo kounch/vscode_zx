@@ -239,13 +239,22 @@ def preproc(line):
             continue
 
         # Expand if it's a separator character and unquoted
-        if letter in ';:,#+-*/=&|^><%!()':
+        if letter in ";:,#+-*/=&|^><%!()'":
             new_line += ' {0} '.format(letter)
         else:
             new_line += letter
 
     # Convert to array of possible tokens
-    arr_line = shlex.split(new_line, posix=False)
+    try:
+        lex = shlex.shlex(new_line, posix=False)
+        lex.quotes = '"'
+        lex.scapedquotes = '"'
+        lex.whitespace_split = True
+        lex.commenters = ''
+        arr_line = list(lex)
+    except:
+        LOGGER.error(line)
+        raise
 
     arr_result = []
     # Special cases: OPEN#, CLOSE#, >>, <<, DEF FN, GO TO, GO SUB
