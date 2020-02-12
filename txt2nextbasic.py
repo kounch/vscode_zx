@@ -257,7 +257,7 @@ def preproc(line):
         raise
 
     arr_result = []
-    # Special cases: OPEN#, CLOSE#, >>, <<, DEF FN, GO TO, GO SUB
+    # Special cases: OPEN#, CLOSE#, >>, << ,<>, >=, <=, DEF FN, GO TO, GO SUB
     for word in arr_line:
         if word == '#' and len(arr_result) > 1:
             if arr_result[-1].upper() in ['OPEN', 'CLOSE']:
@@ -265,6 +265,13 @@ def preproc(line):
                 continue
         elif word in '><' and len(arr_result) > 1:
             if arr_result[-1] == word:
+                arr_result[-1] = arr_result[-1] + word
+                continue
+            if word == '>' and arr_result[-1] == '<':
+                arr_result[-1] = arr_result[-1] + word
+                continue
+        elif word == '=' and len(arr_result) > 1:
+            if arr_result[-1] in '><':
                 arr_result[-1] = arr_result[-1] + word
                 continue
         elif word == 'FN' and len(arr_result) > 1:
