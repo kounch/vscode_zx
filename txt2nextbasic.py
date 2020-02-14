@@ -44,7 +44,7 @@ except (ImportError, AttributeError):
     from pathlib2 import Path
 
 __MY_NAME__ = 'txt2nextbasic.py'
-__MY_VERSION__ = '0.3'
+__MY_VERSION__ = '0.4'
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
@@ -291,89 +291,6 @@ def preproc(line):
     return arr_result
 
 
-def fp(x):
-    """ Returns a floating point number as EXP+128, Mantissa
-
-        Obtained from ZX Basic libraries
-        https://zxbasic.readthedocs.io/en/latest/
-    
-        Copyleft (K) 2008, Jose Rodriguez-Rosa (a.k.a. Boriel)
-        <http://www.boriel.com>
-    """
-    def bin32(f):
-        """ Returns ASCII representation for a 32 bit integer value
-        """
-        result = ''
-        a = int(f) & 0xFFFFFFFF  # ensures int 32
-
-        for _ in range(32):
-            result = str(a % 2) + result
-            a = a >> 1
-
-        return result
-
-    def bindec32(f):
-        """ Returns binary representation of a mantissa x (x is float)
-        """
-        result = '0'
-        a = f
-
-        if f >= 1:
-            result = bin32(f)
-
-        result += '.'
-        c = int(a)
-
-        for _ in range(32):
-            a -= c
-            a *= 2
-            c = int(a)
-            result += str(c)
-
-        return result
-
-    e = 0  # exponent
-    s = 1 if x < 0 else 0  # sign
-    m = abs(x)  # mantissa
-
-    while m >= 1:
-        m /= 2.0
-        e += 1
-
-    while 0 < m < 0.5:
-        m *= 2.0
-        e -= 1
-
-    M = bindec32(m)[3:]
-    M = str(s) + M
-    E = bin32(e + 128)[-8:] if x != 0 else bin32(0)[-8:]
-
-    return M, E
-
-
-def immediate_float(x):
-    """
-     Returns C DE HL as values for loading
-    and immediate floating point.
-
-    Obtained from ZX Basic libraries
-    https://zxbasic.readthedocs.io/en/latest/
-
-    Copyleft (K) 2008, Jose Rodriguez-Rosa (a.k.a. Boriel)
-    <http://www.boriel.com>
-    """
-    def bin2hex(y):
-        return "%02X" % int(y, 2)
-
-    M, E = fp(x)
-
-    C = '0' + bin2hex(E) + 'h'
-    ED = '0' + bin2hex(M[8:16]) + bin2hex(M[:8]) + 'h'
-    LH = '0' + bin2hex(M[24:]) + bin2hex(M[16:24]) + 'h'
-
-    return C, ED, LH
-
-
 #Classes
 #-------
 
@@ -500,28 +417,104 @@ class Basic(object):
 
         return [numberL, numberH]
 
-    def number(self, number):
-        """ Returns a floating point (or integer) number for a BASIC
-        program. That is: It's ASCII representation followed by 5 bytes
-        in floating point or integer format (if number in (-65535 + 65535)
+    def convert(self, strnum):
+        """ Detect if string it's a number and then the type (int or float),
+        then try to convert using Sinclair BASIC 5-byte number format
+        (http://fileformats.archiveteam.org/wiki/Sinclair_BASIC_tokenized_file#5-byte_numeric_format)
         """
-        s = [ord(x) for x in str(number)
-             ] + [14]  # Bytes of string representation in bytes
 
-        if number == int(number) and abs(number) < 65536:  # integer form?
-            sign = 0xFF if number < 0 else 0
-            b = [0, sign] + self.numberLH(number) + [0]
-        else:  # Float form
-            (C, ED, LH) = immediate_float(number)
-            C = C[:2]  # Remove 'h'
-            ED = ED[:4]  # Remove 'h'
-            LH = LH[:4]  # Remove 'h'
+        c = None
 
-            b = [int(C, 16)]  # Convert to BASE 10
-            b += [int(ED[:2], 16), int(ED[2:], 16)]
-            b += [int(LH[:2], 16), int(LH[2:], 16)]
+        det_int = re.compile('[+-]?[0-9]+$')
+        match_int = det_int.match(strnum)
+        if match_int:
+            LOGGER.debug('int: {0}'.format(strnum))
+            newint = int(strnum)
+            c = self.convert_int(newint)
 
-        return s + b
+        det_float = re.compile('[+-]?([0-9]*)?[.][0-9]+$')
+        match_float = det_float.match(strnum)
+        if match_float:
+            LOGGER.debug('float: {0}'.format(strnum))
+            newfloat = float(strnum)
+            c = self.convert_float(newfloat)
+
+        if c:
+            b = strnum.encode('utf-8')
+            c = b''.join([b, b'\x0e', c])
+
+        return c
+
+    def convert_int(self, newint):
+        """Convert int to bytes using 5-byte Sinclair format"""
+
+        if newint < 65536 and newint > -65536:
+            LOGGER.debug('int->{0}'.format(newint))
+            if newint < 0:
+                b = b'\x00\xff'
+                newint += 65536
+            else:
+                b = b'\x00\x00'
+            c = newint.to_bytes(2, byteorder='little', signed=False)
+            b = b''.join([b, c, b'\x00'])
+            return b
+        else:
+            return self.convert_float(float(newint))
+
+    def convert_float(self, newfloat):
+        """Convert float to bytes using 5-byte Sinclair format"""
+
+        if newfloat != 0.0:
+            LOGGER.debug('float->{0}'.format(newfloat))
+            b_sign = '0'
+            normalized = False
+            if newfloat < 0.0:
+                b_sign = '1'
+                newfloat = abs(newfloat)
+
+            intpart = int(newfloat)
+            mantissa = '{0:b}'.format(intpart)
+            if intpart == 0:
+                mantissa = ''
+            else:
+                normalized = True
+            newexp = len(mantissa)
+
+            fractpart = newfloat - intpart
+            i = 0
+            fractbin = ''
+            while i < 32:
+                fractpart *= 2
+                if int(fractpart) > 0:
+                    if not normalized:
+                        newexp -= 1
+                        normalized = True
+                        fractbin = fractbin[i:]
+                        i = 0
+                    fractpart -= int(fractpart)
+                    fractbin += '1'
+                else:
+                    if not normalized:
+                        newexp -= 1
+                    fractbin += '0'
+                i += 1
+
+            fractint = int(fractbin, 2)
+            if newexp < 0:
+                fractint -= 1
+            fractint = '{0:032b}'.format(fractint)
+
+            mantissa += fractint
+            mantissa = b_sign + mantissa[1:]
+
+            b = '{0:08b}'.format(128 + newexp)
+            b += mantissa
+            b = int(b[:40], 2)
+            b = b.to_bytes(5, byteorder='big', signed=False)
+
+            return b
+        else:
+            return self.convert_int(0)
 
     def token(self, string):
         """ Return the token for the given word
@@ -590,7 +583,7 @@ class Basic(object):
                 else:  # Plain text
                     result.extend(self.literal(word))
             elif isinstance(word, float) or isinstance(word, int):  # A number?
-                result.extend(self.number(word))
+                result.extend(self.convert(str(word)))
             else:
                 result.extend(word)  # Another thing
 
