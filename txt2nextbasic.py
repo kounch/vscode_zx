@@ -487,7 +487,6 @@ class Basic(object):
                 fractpart *= 2
                 if int(fractpart) > 0:
                     if not normalized:
-                        newexp -= 1
                         normalized = True
                         fractbin = fractbin[i:]
                         i = 0
@@ -583,7 +582,7 @@ class Basic(object):
                 else:  # Plain text
                     result.extend(self.literal(word))
             elif isinstance(word, float) or isinstance(word, int):  # A number?
-                result.extend(self.convert(str(word)))
+                result.extend(self.convert(i))
             else:
                 result.extend(word)  # Another thing
 
