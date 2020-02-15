@@ -483,7 +483,7 @@ class Basic(object):
             fractpart = newfloat - intpart
             i = 0
             fractbin = ''
-            while i < 32:
+            while i < 33:
                 fractpart *= 2
                 if int(fractpart) > 0:
                     if not normalized:
@@ -501,13 +501,15 @@ class Basic(object):
             fractint = int(fractbin, 2)
             if newexp < 0:
                 fractint -= 1
-            fractint = '{0:032b}'.format(fractint)
+            fractint = '{0:033b}'.format(fractint)
 
             mantissa += fractint
             mantissa = b_sign + mantissa[1:]
 
             b = '{0:08b}'.format(128 + newexp)
             b += mantissa
+            if b[40] == '1':
+                b = b[:39] + '1'
             b = int(b[:40], 2)
             b = b.to_bytes(5, byteorder='big', signed=False)
 
