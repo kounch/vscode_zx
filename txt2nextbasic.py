@@ -84,7 +84,7 @@ def main():
         basic_data = Basic()
         for line in code:
             line = line.strip()
-            arr_line = line.split()
+            arr_line = line.split(' ', -1)
             if line and line[
                     0] != '#':  #  Comments and directives aren't parsed
                 arr_line = preproc(line)
@@ -202,7 +202,28 @@ def parse_args():
 def preproc(line):
     """Does some pre-processing on a BASIC line"""
 
-    # Char conversion
+    # Escape conversion
+    arr_line = line.split('`')
+    n_line = ''
+    if arr_line:
+        n_line = arr_line[0]
+        for p_line in arr_line[1:]:
+            str_i = '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'
+            str_x = '(x[0-9a-fA-F]{1,2})'
+            det_esc = re.compile('({0}|{1})(.*)'.format(str_i, str_x))
+            match_esc = det_esc.findall(p_line)
+            if match_esc:
+                match_esc = match_esc[0]
+                n_char = match_esc[1]
+                if match_esc[2]:
+                    n_char = match_esc[2].replace('x', '0x')
+                n_line += chr(int(n_char, 0))
+                n_line += match_esc[3]
+            else:
+                n_line += p_line
+    line = n_line
+
+    # UTF Char conversion
     for s_char in CHARS:
         line = line.replace(s_char, CHARS[s_char])
 
