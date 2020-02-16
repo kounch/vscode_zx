@@ -203,9 +203,8 @@ def preproc(line):
     """Does some pre-processing on a BASIC line"""
 
     # Char conversion
-    dict_char = {'£': '`', '©': '\x7f'}
-    for s_char in dict_char:
-        line = line.replace(s_char, dict_char[s_char])
+    for s_char in CHARS:
+        line = line.replace(s_char, CHARS[s_char])
 
     # Detect ; and REM comments
     comment = ''
@@ -751,6 +750,26 @@ TOKENS = {
     'CLEAR': 253,
     'RETURN': 254,
     'COPY': 255
+}
+
+CHARS = {
+    '£': '`',
+    '©': '\x7f',
+    '\u259D': '\x81',  # Quadrant upper right
+    '\u2598': '\x82',  # Quadrant upper left
+    '\u2580': '\x83',  # Upper half block
+    '\u2597': '\x84',  # Quadrant lower right
+    '\u2590': '\x85',  # Right half block
+    '\u259A': '\x86',  # Quadrant upper left and lower right
+    '\u259C': '\x87',  # Quadrant upper left and upper right and lower right
+    '\u2596': '\x88',  # Quadrant lower left
+    '\u259E': '\x89',  # Quadrant upper right and lower left
+    '\u258C': '\x8a',  # Left half block
+    '\u259B': '\x8b',  # Quadrant upper left and upper right and lower left
+    '\u2584': '\x8c',  # Lower half block
+    '\u259F': '\x8d',  # Quadrant upper right and lower left and lower right
+    '\u2599': '\x8e',  # Quadrant upper left and lower left and lower right
+    '\u2588': '\x8f'  # Full block
 }
 
 if __name__ == '__main__':
