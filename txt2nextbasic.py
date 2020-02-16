@@ -202,6 +202,11 @@ def parse_args():
 def preproc(line):
     """Does some pre-processing on a BASIC line"""
 
+    # Char conversion
+    dict_char = {'£': '`', '©': '\x7f'}
+    for s_char in dict_char:
+        line = line.replace(s_char, dict_char[s_char])
+
     # Detect ; and REM comments
     comment = ''
     # Comments at start of line
