@@ -34,7 +34,7 @@ except (ImportError, AttributeError):
     from pathlib2 import Path
 
 __MY_NAME__ = 'rennextbasic.py'
-__MY_VERSION__ = '0.3'
+__MY_VERSION__ = '0.4'
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
@@ -55,113 +55,136 @@ def main():
     """Main Routine"""
 
     arg_data = parse_args()
-    with open(arg_data['input'], 'r') as f:
-        code = f.readlines()
 
-    arr_lines = {}
-    for line in code:
-        test_line = line.strip()
-        if test_line and test_line[
-                0] != '#':  # Lines with only comments and directives aren't parsed
+    new_lines = []
+    if arg_data['decode']:
+        # Binary decoding to ` codes
+        LOGGER.debug("Decoding...")
+        with open(arg_data['input'], 'rb') as f:
+            code = f.read()
+            code = code.split(b'\r')
 
-            # Split line number and content, then catalog
-            det_comm = re.compile('(\\s*\\d+)\\s*(.*)')
-            match_comm = det_comm.match(line)
-            if match_comm:
-                l_number = int(match_comm.group(1).strip())
-                l_text = match_comm.group(2).strip()
-                if l_number not in arr_lines:
-                    arr_lines[l_number] = [0, l_text]
+        for line in code:
+            n_line = ''
+            for i_char in line:
+                if i_char in CHARS:
+                    n_line += CHARS[i_char]
+                elif i_char < 32 or i_char > 127:
+                    n_line += '`x{:02x}'.format(i_char)
                 else:
-                    str_msg = _('Duplicated line number: {0}')
-                    LOGGER.error(str_msg.format(l_number))
-            else:
-                str_msg = _('Line number not found: {0}')
-                LOGGER.warn(str_msg.format(line))
+                    n_line += chr(i_char)
 
-    max_lines = len(arr_lines.keys())
-    if max_lines < 1000:
-        n_step = 10
-    elif max_lines < 2000:
-        n_step = 5
-    elif max_lines < 5000:
-        n_step = 2
+            new_lines.append(n_line + '\r\n')
     else:
-        n_step = 1
+        LOGGER.debug("Renumbering...")
+        with open(arg_data['input'], 'r') as f:
+            code = f.readlines()
 
-    if arg_data['step'] > n_step:
-        str_msg = _('Too many lines ({0})!. Step changed to: {1}')
-        LOGGER.warn(str_msg.format(max_lines, n_step))
-    else:
-        n_step = arg_data['step']
-
-    must_change = False
-
-    cur_line = n_step
-    for item in arr_lines:
-        arr_lines[item][0] = cur_line
-        if item != cur_line:
-            must_change = True
-        cur_line += n_step
-
-    if must_change:
-        new_lines = []
+        arr_lines = {}
         for line in code:
             test_line = line.strip()
-            if test_line:
-                if test_line[
-                        0] == '#':  # Lines with only comments and directives aren't parsed
-                    l_text = line
-                    if test_line.startswith('#autostart '):
-                        # Split line number and content
-                        det_comm = re.compile('(#autostart\\s+)(\\d+)(.*)')
-                        match_comm = det_comm.match(line)
-                        if match_comm:
-                            old_number = int(match_comm.group(2))
-                            new_number = arr_lines[old_number][0]
-                            l_text = '{0}'.format(match_comm.group(1))
-                            l_text += '{0}'.format(new_number)
-                            l_text += '{0}\n'.format(match_comm.group(3))
+            if test_line and test_line[
+                    0] != '#':  # Lines with only comments and directives aren't parsed
 
-                    new_lines.append(l_text)
+                # Split line number and content, then catalog
+                det_comm = re.compile('(\\s*\\d+)\\s*(.*)')
+                match_comm = det_comm.match(line)
+                if match_comm:
+                    l_number = int(match_comm.group(1).strip())
+                    l_text = match_comm.group(2).strip()
+                    if l_number not in arr_lines:
+                        arr_lines[l_number] = [0, l_text]
+                    else:
+                        str_msg = _('Duplicated line number: {0}')
+                        LOGGER.error(str_msg.format(l_number))
                 else:
-                    # Split line number and content
-                    det_comm = re.compile('(\\s*\\d+)\\s*(.*)')
-                    match_comm = det_comm.match(line)
-                    if match_comm:
-                        l_number = int(match_comm.group(1).strip())
-                        l_text = match_comm.group(2)
+                    str_msg = _('Line number not found: {0}')
+                    LOGGER.warn(str_msg.format(line))
 
-                    new_number = arr_lines[l_number][0]
-                    new_line = '{0:>4} '.format(new_number)
+        max_lines = len(arr_lines.keys())
+        if max_lines < 1000:
+            n_step = 10
+        elif max_lines < 2000:
+            n_step = 5
+        elif max_lines < 5000:
+            n_step = 2
+        else:
+            n_step = 1
 
-                    # Find GO TO, GO SUB, SAVE or RESTORE
-                    arr_match = [
-                        '(.*\\s*go\\s+to\\s+)(\\d+)(.*)',
-                        '(.*\\s*go\\s+sub\\s+)(\\d+)(.*)',
-                        '(.*save\\s*".*"\\s*line\\s*)',
-                        '(.*\\s*restore\\s+)(\\d+)(.*)',
-                    ]
-                    for str_match in arr_match:
-                        det_comm = re.compile(str_match, re.IGNORECASE)
-                        match_comm = det_comm.match(l_text)
-                        if match_comm:
-                            old_number = int(match_comm.group(2))
-                            if old_number in arr_lines:
+        if arg_data['step'] > n_step:
+            str_msg = _('Too many lines ({0})!. Step changed to: {1}')
+            LOGGER.warn(str_msg.format(max_lines, n_step))
+        else:
+            n_step = arg_data['step']
+
+        must_change = False
+
+        cur_line = n_step
+        for item in arr_lines:
+            arr_lines[item][0] = cur_line
+            if item != cur_line:
+                must_change = True
+            cur_line += n_step
+
+        if must_change:
+            for line in code:
+                test_line = line.strip()
+                if test_line:
+                    if test_line[
+                            0] == '#':  # Lines with only comments and directives aren't parsed
+                        l_text = line
+                        if test_line.startswith('#autostart '):
+                            # Split line number and content
+                            det_comm = re.compile('(#autostart\\s+)(\\d+)(.*)')
+                            match_comm = det_comm.match(line)
+                            if match_comm:
+                                old_number = int(match_comm.group(2))
                                 new_number = arr_lines[old_number][0]
                                 l_text = '{0}'.format(match_comm.group(1))
-                                l_text += '{0}{1}'.format(
-                                    new_number, match_comm.group(3))
-                            else:
-                                str_msg = _(
-                                    'Line not found!: {0} in line {1}({2})')
-                                LOGGER.error(
-                                    str_msg.format(old_number, l_number,
-                                                   new_number))
+                                l_text += '{0}'.format(new_number)
+                                l_text += '{0}\r\n'.format(match_comm.group(3))
 
-                    new_line += l_text + '\n'
-                    new_lines.append(new_line)
+                        new_lines.append(l_text)
+                    else:
+                        # Split line number and content
+                        det_comm = re.compile('(\\s*\\d+)\\s*(.*)')
+                        match_comm = det_comm.match(line)
+                        if match_comm:
+                            l_number = int(match_comm.group(1).strip())
+                            l_text = match_comm.group(2)
 
+                        new_number = arr_lines[l_number][0]
+                        new_line = '{0:>4} '.format(new_number)
+
+                        # Find GO TO, GO SUB, SAVE or RESTORE
+                        arr_match = [
+                            '(.*\\s*go\\s+to\\s+)(\\d+)(.*)',
+                            '(.*\\s*go\\s+sub\\s+)(\\d+)(.*)',
+                            '(.*save\\s*".*"\\s*line\\s*)',
+                            '(.*\\s*restore\\s+)(\\d+)(.*)',
+                        ]
+                        for str_match in arr_match:
+                            det_comm = re.compile(str_match, re.IGNORECASE)
+                            match_comm = det_comm.match(l_text)
+                            if match_comm:
+                                old_number = int(match_comm.group(2))
+                                if old_number in arr_lines:
+                                    new_number = arr_lines[old_number][0]
+                                    l_text = '{0}'.format(match_comm.group(1))
+                                    l_text += '{0}{1}'.format(
+                                        new_number, match_comm.group(3))
+                                else:
+                                    str_msg = _(
+                                        'Line not found!: {0} in line {1}({2})'
+                                    )
+                                    LOGGER.error(
+                                        str_msg.format(old_number, l_number,
+                                                       new_number))
+
+                        new_line += l_text + '\r\n'
+                        new_lines.append(new_line)
+
+    if new_lines:
         if arg_data['output']:
             output_file = arg_data['output']
         else:
@@ -209,6 +232,11 @@ def parse_args():
                         action='store',
                         dest='step',
                         help=str_hlp_steps)
+    parser.add_argument('-d',
+                        '--decode',
+                        action='store_true',
+                        dest='decode_binary',
+                        help='Decode binary BASIC data to `x codes')
 
     arguments = parser.parse_args()
 
@@ -232,12 +260,37 @@ def parse_args():
         str_msg = _('Input path does not exist!')
         raise IOError(str_msg)
 
+    b_decode = False
+    if arguments.decode_binary:
+        b_decode = True
+
     values['input'] = i_path
     values['output'] = o_path
     values['step'] = step
+    values['decode'] = b_decode
 
     return values
 
+
+CHARS = {
+    0x60: '£',
+    0x7f: '©',
+    0x81: '\u259D',  # Quadrant upper right
+    0x82: '\u2598',  # Quadrant upper left
+    0x83: '\u2580',  # Upper half block
+    0x84: '\u2597',  # Quadrant lower right
+    0x85: '\u2590',  # Right half block
+    0x86: '\u259A',  # Quadrant upper left and lower right
+    0x87: '\u259C',  # Quadrant upper left and upper right and lower right
+    0x88: '\u2596',  # Quadrant lower left
+    0x89: '\u259E',  # Quadrant upper right and lower left
+    0x8a: '\u258C',  # Left half block
+    0x8b: '\u259B',  # Quadrant upper left and upper right and lower left
+    0x8c: '\u2584',  # Lower half block
+    0x8d: '\u259F',  # Quadrant upper right and lower left and lower right
+    0x8e: '\u2599',  # Quadrant upper left and lower left and lower right
+    0x8f: '\u2588'  # Full block
+}
 
 if __name__ == '__main__':
     main()
