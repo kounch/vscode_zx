@@ -44,7 +44,7 @@ except (ImportError, AttributeError):
     from pathlib2 import Path
 
 __MY_NAME__ = 'txt2nextbasic.py'
-__MY_VERSION__ = '0.4'
+__MY_VERSION__ = '0.5'
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
@@ -84,7 +84,7 @@ def main():
         basic_data = Basic()
         for line in code:
             line = line.strip()
-            arr_line = line.split()
+            arr_line = line.split(' ', -1)
             if line and line[
                     0] != '#':  #  Comments and directives aren't parsed
                 arr_line = preproc(line)
@@ -201,6 +201,31 @@ def parse_args():
 
 def preproc(line):
     """Does some pre-processing on a BASIC line"""
+
+    # Escape conversion
+    arr_line = line.split('`')
+    n_line = ''
+    if arr_line:
+        n_line = arr_line[0]
+        for p_line in arr_line[1:]:
+            str_i = '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'
+            str_x = '(x[0-9a-fA-F]{1,2})'
+            det_esc = re.compile('({0}|{1})(.*)'.format(str_i, str_x))
+            match_esc = det_esc.findall(p_line)
+            if match_esc:
+                match_esc = match_esc[0]
+                n_char = match_esc[1]
+                if match_esc[2]:
+                    n_char = match_esc[2].replace('x', '0x')
+                n_line += chr(int(n_char, 0))
+                n_line += match_esc[3]
+            else:
+                n_line += p_line
+    line = n_line
+
+    # UTF Char conversion
+    for s_char in CHARS:
+        line = line.replace(s_char, CHARS[s_char])
 
     # Detect ; and REM comments
     comment = ''
@@ -417,27 +442,35 @@ class Basic(object):
 
         return [numberL, numberH]
 
-    def convert(self, strnum):
-        """ Detect if string it's a number and then the type (int or float),
+    def convert(self, strnum, strprev):
+        """ Detect if string it's a number and then the type (binary, int, float),
         then try to convert using Sinclair BASIC 5-byte number format
         (http://fileformats.archiveteam.org/wiki/Sinclair_BASIC_tokenized_file#5-byte_numeric_format)
         """
 
         c = None
 
-        det_int = re.compile('[+-]?[0-9]+$')
-        match_int = det_int.match(strnum)
-        if match_int:
-            LOGGER.debug('int: {0}'.format(strnum))
-            newint = int(strnum)
-            c = self.convert_int(newint)
+        if strprev.upper() == 'BIN':
+            det_int = re.compile('[01]{8}$')
+            match_int = det_int.match(strnum)
+            if match_int:
+                LOGGER.debug('bin: {0}'.format(strnum))
+                newint = int(strnum, base=2)
+                c = self.convert_bin(newint)
+        else:
+            det_int = re.compile('[+-]?[0-9]+$')
+            match_int = det_int.match(strnum)
+            if match_int:
+                LOGGER.debug('int: {0}'.format(strnum))
+                newint = int(strnum)
+                c = self.convert_int(newint)
 
-        det_float = re.compile('[+-]?([0-9]*)?[.][0-9]+$')
-        match_float = det_float.match(strnum)
-        if match_float:
-            LOGGER.debug('float: {0}'.format(strnum))
-            newfloat = float(strnum)
-            c = self.convert_float(newfloat)
+            det_float = re.compile('[+-]?([0-9]*)?[.][0-9]+$')
+            match_float = det_float.match(strnum)
+            if match_float:
+                LOGGER.debug('float: {0}'.format(strnum))
+                newfloat = float(strnum)
+                c = self.convert_float(newfloat)
 
         if c:
             b = strnum.encode('utf-8')
@@ -483,11 +516,10 @@ class Basic(object):
             fractpart = newfloat - intpart
             i = 0
             fractbin = ''
-            while i < 32:
+            while i < 33:
                 fractpart *= 2
                 if int(fractpart) > 0:
                     if not normalized:
-                        newexp -= 1
                         normalized = True
                         fractbin = fractbin[i:]
                         i = 0
@@ -502,19 +534,28 @@ class Basic(object):
             fractint = int(fractbin, 2)
             if newexp < 0:
                 fractint -= 1
-            fractint = '{0:032b}'.format(fractint)
+            fractint = '{0:033b}'.format(fractint)
 
             mantissa += fractint
             mantissa = b_sign + mantissa[1:]
 
             b = '{0:08b}'.format(128 + newexp)
             b += mantissa
+            if b[40] == '1':
+                b = b[:39] + '1'
             b = int(b[:40], 2)
             b = b.to_bytes(5, byteorder='big', signed=False)
 
             return b
         else:
             return self.convert_int(0)
+
+    def convert_bin(self, newbin):
+        """Convert bin to bytes using 5-byte Sinclair format"""
+        LOGGER.debug('bin->{0}'.format(newbin))
+        c = newbin.to_bytes(1, byteorder='big', signed=False)
+        b = b''.join([b'\x00\x00', c, b'\x00\x00'])
+        return b
 
     def token(self, string):
         """ Return the token for the given word
@@ -565,6 +606,7 @@ class Basic(object):
         """
 
         result = []
+        prev_i = ''
         for i in sentence:
             try:
                 word = int(i)
@@ -583,9 +625,11 @@ class Basic(object):
                 else:  # Plain text
                     result.extend(self.literal(word))
             elif isinstance(word, float) or isinstance(word, int):  # A number?
-                result.extend(self.convert(str(word)))
+                result.extend(self.convert(i, prev_i))
             else:
                 result.extend(word)  # Another thing
+
+            prev_i = i
 
         return result
 
@@ -745,6 +789,26 @@ TOKENS = {
     'CLEAR': 253,
     'RETURN': 254,
     'COPY': 255
+}
+
+CHARS = {
+    '£': '`',
+    '©': '\x7f',
+    '\u259D': '\x81',  # Quadrant upper right
+    '\u2598': '\x82',  # Quadrant upper left
+    '\u2580': '\x83',  # Upper half block
+    '\u2597': '\x84',  # Quadrant lower right
+    '\u2590': '\x85',  # Right half block
+    '\u259A': '\x86',  # Quadrant upper left and lower right
+    '\u259C': '\x87',  # Quadrant upper left and upper right and lower right
+    '\u2596': '\x88',  # Quadrant lower left
+    '\u259E': '\x89',  # Quadrant upper right and lower left
+    '\u258C': '\x8a',  # Left half block
+    '\u259B': '\x8b',  # Quadrant upper left and upper right and lower left
+    '\u2584': '\x8c',  # Lower half block
+    '\u259F': '\x8d',  # Quadrant upper right and lower left and lower right
+    '\u2599': '\x8e',  # Quadrant upper left and lower left and lower right
+    '\u2588': '\x8f'  # Full block
 }
 
 if __name__ == '__main__':
