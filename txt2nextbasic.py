@@ -44,7 +44,7 @@ except (ImportError, AttributeError):
     from pathlib2 import Path
 
 __MY_NAME__ = 'txt2nextbasic.py'
-__MY_VERSION__ = '0.4'
+__MY_VERSION__ = '0.5'
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
@@ -442,27 +442,35 @@ class Basic(object):
 
         return [numberL, numberH]
 
-    def convert(self, strnum):
-        """ Detect if string it's a number and then the type (int or float),
+    def convert(self, strnum, strprev):
+        """ Detect if string it's a number and then the type (binary, int, float),
         then try to convert using Sinclair BASIC 5-byte number format
         (http://fileformats.archiveteam.org/wiki/Sinclair_BASIC_tokenized_file#5-byte_numeric_format)
         """
 
         c = None
 
-        det_int = re.compile('[+-]?[0-9]+$')
-        match_int = det_int.match(strnum)
-        if match_int:
-            LOGGER.debug('int: {0}'.format(strnum))
-            newint = int(strnum)
-            c = self.convert_int(newint)
+        if strprev.upper() == 'BIN':
+            det_int = re.compile('[01]{8}$')
+            match_int = det_int.match(strnum)
+            if match_int:
+                LOGGER.debug('bin: {0}'.format(strnum))
+                newint = int(strnum, base=2)
+                c = self.convert_bin(newint)
+        else:
+            det_int = re.compile('[+-]?[0-9]+$')
+            match_int = det_int.match(strnum)
+            if match_int:
+                LOGGER.debug('int: {0}'.format(strnum))
+                newint = int(strnum)
+                c = self.convert_int(newint)
 
-        det_float = re.compile('[+-]?([0-9]*)?[.][0-9]+$')
-        match_float = det_float.match(strnum)
-        if match_float:
-            LOGGER.debug('float: {0}'.format(strnum))
-            newfloat = float(strnum)
-            c = self.convert_float(newfloat)
+            det_float = re.compile('[+-]?([0-9]*)?[.][0-9]+$')
+            match_float = det_float.match(strnum)
+            if match_float:
+                LOGGER.debug('float: {0}'.format(strnum))
+                newfloat = float(strnum)
+                c = self.convert_float(newfloat)
 
         if c:
             b = strnum.encode('utf-8')
@@ -542,6 +550,13 @@ class Basic(object):
         else:
             return self.convert_int(0)
 
+    def convert_bin(self, newbin):
+        """Convert bin to bytes using 5-byte Sinclair format"""
+        LOGGER.debug('bin->{0}'.format(newbin))
+        c = newbin.to_bytes(1, byteorder='big', signed=False)
+        b = b''.join([b'\x00\x00', c, b'\x00\x00'])
+        return b
+
     def token(self, string):
         """ Return the token for the given word
         """
@@ -591,6 +606,7 @@ class Basic(object):
         """
 
         result = []
+        prev_i = ''
         for i in sentence:
             try:
                 word = int(i)
@@ -609,9 +625,11 @@ class Basic(object):
                 else:  # Plain text
                     result.extend(self.literal(word))
             elif isinstance(word, float) or isinstance(word, int):  # A number?
-                result.extend(self.convert(i))
+                result.extend(self.convert(i, prev_i))
             else:
                 result.extend(word)  # Another thing
+
+            prev_i = i
 
         return result
 
