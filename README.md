@@ -4,8 +4,10 @@ Visual Studio Code Tasks and Scripts for NextBASIC and ZX Basic
 
 Features:
 
-- NextBASIC text to `.bas` file converter (work in progress)
-- NextBASIC text renumbering (work in progress too)
+- NextBASIC text to `.bas` file converter
+- NextBASIC text renumbering
+- Converts [unicode block elements](https://en.wikipedia.org/wiki/Block_Elements) to Sinclair block graphics
+- Support of non-printable characters using ` as escape character
 - Task support to compile with ZX Basic
 - Task integration to build (or convert) and run in ZEsarUX and CSpect emulators
 - Works with Windows, MacOS and (possibly) Linux
@@ -128,6 +130,14 @@ On MacOS:
 
 ### How to use
 
+#### BAS Files
+
+The tasks and scripts are designed to deal with text files, with `.bas` extension, and encoded using UTF-8, with windows line endings (CRLF).
+
+You can use [unicode block elements](https://en.wikipedia.org/wiki/Block_Elements) which will be automatically converted. Also , it is possible to have non-printable characters, using `` ` `` as escape code, and then the desired code, as a decimal or hexadecimal number (in this case preceded by "`x`"). For example, use `` `16`2`17`6`` or `` `x10`x02`x11`x06`` to send red ink and yellow paper codes.
+
+A list of Sinclair codes is available [at this link](https://www.worldofspectrum.org/ZXBasicManual/zxmanappa.html). For ZX Spectrum Next codes see appendix A, in the official manual.
+
 #### Renumbering
 
 Open the directory "Projects" with Visual Studio Code.
@@ -202,8 +212,10 @@ Tareas y scripts de Visual Studio Code para el desarrollo en NextBASIC y ZX Basi
 
 Características:
 
-- Conversor de texto a ficheros `.bas` de NextBASIC (en construcción)
-- Función para volver a numerar un listado de NextBASIC (en construcción también)
+- Conversor de texto a ficheros `.bas` de NextBASIC
+- Función para volver a numerar un listado de NextBASIC
+- Conversión de [caracteres unicode de bloques](https://en.wikipedia.org/wiki/Block_Elements) a gráficos de bloques de Sinclair
+- Soporte de caracteres no imprimibles usando ` como código de escape
 - Tareas para compilar con ZX Basic
 - Integración de tareas para compilar (o convertir) y ejecutar en los emuladores ZEsarUX y CSpect
 - Funciona en Windows, MacOS y (teóricamente) Linux
@@ -329,6 +341,14 @@ En el caso de MacOS
     hdfmonkey put ./ZEsarUX.app/Contents/Resources/tbblue.mmc ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
 
 ### Uso
+
+#### Ficheros BAS
+
+Las tareas y scripts están diseñados para tratar con ficheros de texto, con extensión `.bas`, con codificación UTF-8, con saltos de línea windows (CRLF).
+
+Es posible utilizar [caracteres unicode de bloques](https://en.wikipedia.org/wiki/Block_Elements) que serán automáticamente convertidos, así como caracteres no imprimibles, usando `` ` `` como código de escape y luego el código correspondiente, bien en decimal, o bien en hexadecimal (precedido por "`x`"). Por ejemplo, para indicar tinta roja y papel amarillo: `` `16`2`17`6``. o bien `` `x10`x02`x11`x06``.
+
+Se pueden consultar todos los códigos de Sinclair originales [en este enlace](https://www.worldofspectrum.org/ZXBasicManual/zxmanappa.html). Para ZX Spectrum Next, consultar el apéndice A del manual oficial.
 
 #### Numeración de líneas
 
