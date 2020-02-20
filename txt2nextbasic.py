@@ -227,6 +227,22 @@ def preproc(line):
     for s_char in CHARS:
         line = line.replace(s_char, CHARS[s_char])
 
+    # Detect and prepare DEF FN parameters
+    det_params = re.compile('(.*DEF\\s+FN[^\\(]*\\()([^\\)]*)(\\).*)')
+    match_det = det_params.match(line)
+    if match_det:
+        line = match_det.group(1)
+        str_params = match_det.group(2)
+        if str_params:
+            arr_params = str_params.split(',')
+            arr_line = []
+            for param in arr_params:
+                param = param.strip()
+                arr_line.append('{0}\x0e-----'.format(param))
+            str_params = ','.join(arr_line)
+        line += str_params
+        line += match_det.group(3)
+
     # Detect ; and REM comments
     comment = ''
     # Comments at start of line
