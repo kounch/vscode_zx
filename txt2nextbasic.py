@@ -4,14 +4,7 @@
 # Do not change the previous lines. See PEP 8, PEP 263.
 """
 Text to NextBASIC File Converter for ZX Spectrum Next (+3e/ESXDOS compatible)
-
     Copyright (c) 2020 @Kounch
-
-    BASIC parser modified from original version in ZX Basic libraries
-    https://zxbasic.readthedocs.io/en/latest/
-
-    ZX Basic Copyleft (K) 2008, Jose Rodriguez-Rosa (a.k.a. Boriel)
-    <http://www.boriel.com>
 
     File Structure and Headers obtained from
     http://www.worldofspectrum.org/ZXSpectrum128+3Manual/chapter8pt27.html
@@ -20,12 +13,10 @@ Text to NextBASIC File Converter for ZX Spectrum Next (+3e/ESXDOS compatible)
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
@@ -44,7 +35,7 @@ except (ImportError, AttributeError):
     from pathlib2 import Path
 
 __MY_NAME__ = 'txt2nextbasic.py'
-__MY_VERSION__ = '0.5'
+__MY_VERSION__ = '1.0'
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
@@ -78,24 +69,18 @@ def main():
             s_addr = arg_data['start_addr']
             code = ['#autostart']
             code += ['10 CLEAR {0}'.format(s_addr - 1)]
-            code += ['LOAD "{0}" CODE {1}'.format(arg_data['name'], s_addr)]
+            code += ['20 LOAD "{0}" CODE {1}'.format(arg_data['name'], s_addr)]
             code += ['30 RANDOMIZE USR {0}'.format(s_addr)]
 
-        basic_data = Basic()
+        basic_data = []
         for line in code:
             line = line.strip()
             arr_line = line.split(' ', -1)
             if line and line[
                     0] != '#':  #  Comments and directives aren't parsed
-                arr_line = preproc(line)
+                arr_line = proc_basic(line)
                 if arr_line:
-                    n_line = None
-                    # Detect line numbers
-                    if arr_line[0].isdigit():
-                        n_line = int(arr_line[0])
-                        arr_line = arr_line[1:]
-                    # Parse line
-                    basic_data.add_line([arr_line], n_line)
+                    basic_data.append(arr_line)
             elif line.startswith('#program'):
                 if not arg_data['output']:
                     if len(arr_line) > 1:
@@ -106,7 +91,10 @@ def main():
                     load_addr = int(arr_line[1])
                 else:
                     load_addr = 0
-        file_content = bytearray(basic_data.bytes)
+            else:
+                LOGGER.error('Cannot parse line')
+
+        file_content = b''.join(basic_data)
 
     # Save bytes to file
     file_obj = Plus3DosFile(0, file_content, load_addr)
@@ -199,24 +187,68 @@ def parse_args():
     return values
 
 
-def preproc(line):
-    """Does some pre-processing on a BASIC line"""
+def proc_basic(line):
+    """Does processing on a BASIC line"""
+
+    line_number, line = extract_linenumber(line)
+    line = convert_char(line)
+    line, comment = extract_comment(line)
+    arr_statements = extract_statements(line)
+
+    line_bin = ''
+    for str_statement in arr_statements:
+        if str_statement:
+            if str_statement[0] != '"':
+                str_statement = process_tokens(str_statement)
+                str_statement = process_params(str_statement)
+                str_statement = process_numbers(str_statement)
+
+        line_bin += str_statement
+
+    line_bin += comment + '\x0d'
+
+    line_bin = [ord(c) for c in line_bin]
+    line_len = len(line_bin)
+
+    line_number = line_number.to_bytes(2, byteorder='big')
+    line_len = line_len.to_bytes(2, byteorder='little')
+    line_bin = bytes(line_bin)
+
+    line_bin = b''.join([line_number, line_len, line_bin])
+
+    return line_bin
+
+
+def extract_linenumber(line):
+    """Splits line into line number and line"""
+
+    det_line = re.compile('\\s*([0-9]+)\\s*(.*)')
+    match_det = det_line.match(line)
+    if match_det:
+        line_number = match_det.group(1)
+        line = match_det.group(2)
+
+    return int(line_number), line
+
+
+def convert_char(line):
+    """Converts non-ASCII characters from UTF-8 to Sinclair ASCII"""
 
     # Escape conversion
-    arr_line = line.split('`')
+    arr_line = line.split('`')  # Split using escape ` char
     n_line = ''
     if arr_line:
         n_line = arr_line[0]
         for p_line in arr_line[1:]:
-            str_i = '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'
-            str_x = '(x[0-9a-fA-F]{1,2})'
+            str_i = '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'  # Integer between 0 and 255
+            str_x = '(x[0-9a-fA-F]{1,2})'  # Hex between 0 and FF
             det_esc = re.compile('({0}|{1})(.*)'.format(str_i, str_x))
             match_esc = det_esc.findall(p_line)
             if match_esc:
                 match_esc = match_esc[0]
                 n_char = match_esc[1]
                 if match_esc[2]:
-                    n_char = match_esc[2].replace('x', '0x')
+                    n_char = match_esc[2].replace(u'x', u'0x')
                 n_line += chr(int(n_char, 0))
                 n_line += match_esc[3]
             else:
@@ -227,11 +259,96 @@ def preproc(line):
     for s_char in CHARS:
         line = line.replace(s_char, CHARS[s_char])
 
+    return line
+
+
+def extract_comment(line):
+    """Extracts ; and REM comments from line"""
+
+    # Detect ; and REM comments
+    comment = ''
+    det_comm = re.compile(
+        '(\\s*\\d*\\s*(?:;|REM\\s?))(.*)')  # Comments at start of line
+    match_comm = det_comm.match(line)
+    if match_comm:
+        line = match_comm.group(1)
+        comment = match_comm.group(2)
+    else:
+        det_comm = re.compile('(.*:\\s*(?:;|REM\\s?))(.*)')  # Comments after :
+        match_comm = det_comm.match(line)
+        if match_comm:
+            n_line = match_comm.group(1)
+            if n_line.count(u'"') % 2 == 0:  # Not between quotes
+                line = n_line
+                comment = match_comm.group(2)
+
+    return line, comment
+
+
+def extract_statements(line):
+    """Converts line to array with quoted elements and statements isolated"""
+
+    arr_line = []
+    # Split quoted elements
+    b_quote = False
+    elem_line = u''
+    for letter in line:
+        if letter == u'"':
+            if b_quote:
+                b_quote = False
+                elem_line += letter
+                arr_line.append(elem_line)
+                elem_line = u''
+                continue
+            else:
+                arr_line.append(elem_line)
+                elem_line = u''
+                b_quote = True
+
+        elem_line += letter
+    if elem_line:
+        arr_line.append(elem_line)
+
+    arr_statements = []
+    for elem_line in arr_line:
+        if elem_line:
+            if elem_line[0] == u'"':
+                arr_statements.append(elem_line)
+            else:
+                i = prev_i = 0
+                for str_char in elem_line:
+                    if str_char == u':':
+                        arr_statements.append(elem_line[prev_i:i])
+                        prev_i = i
+                    i += 1
+                if prev_i < i:
+                    arr_statements.append(elem_line[prev_i:i])
+
+    return arr_statements
+
+
+def process_tokens(str_statement):
+    """ Converts token strings to Sinclair ASCII"""
+
+    for token in TOKENS:
+        chr_token = chr(TOKENS[token])
+        det_t = re.compile('(\\s*{0}\\s*)'.format(token))
+        find_t = det_t.findall(str_statement)
+        if find_t:
+            for str_token in find_t:
+                str_statement = str_statement.replace(str_token, chr_token)
+
+    return str_statement
+
+
+def process_params(str_statement):
+    """Parses statement and expands parameters to 5-byte format"""
+
     # Detect and prepare DEF FN parameters
-    det_params = re.compile('(.*DEF\\s+FN[^\\(]*\\()([^\\)]*)(\\).*)')
-    match_det = det_params.match(line)
+    det_params = re.compile('(.*\xCE[^\\(]*\\()([^\\)]*)(\\).*)')
+    match_det = det_params.match(str_statement)
     if match_det:
-        line = match_det.group(1)
+        str_statement = match_det.group(1)
         str_params = match_det.group(2)
         if str_params:
             arr_params = str_params.split(',')
@@ -240,96 +357,167 @@ def preproc(line):
                 param = param.strip()
                 arr_line.append('{0}\x0e-----'.format(param))
             str_params = ','.join(arr_line)
-        line += str_params
-        line += match_det.group(3)
+        str_statement += str_params
+        str_statement += match_det.group(3)
 
-    # Detect ; and REM comments
-    comment = ''
-    # Comments at start of line
-    det_comm = re.compile('(\\s*\\d*\\s*(?:;|REM\\s?))(.*)')
-    match_comm = det_comm.match(line)
-    if match_comm:
-        line = match_comm.group(1)
-        comment = match_comm.group(2)
-    else:
-        # Comments after :
-        det_comm = re.compile('(.*:\\s*(?:;|REM\\s?))(.*)')
-        match_comm = det_comm.match(line)
-        if match_comm:
-            n_line = match_comm.group(1)
-            if n_line.count('"') % 2 == 0:  # Not between quotes
-                line = n_line
-                comment = match_comm.group(2)
+    return str_statement
 
-    # Detect if quoted
-    b_quote = False
 
-    new_line = ''
-    for letter in line:
-        if letter == '"':
-            if b_quote:
-                b_quote = False
-            else:
-                b_quote = True
+def process_numbers(str_statement):
+    """Parses statement and expands numbers to 5-byte format"""
 
-            new_line += letter
-            continue
-
-        if b_quote:
-            new_line += letter
-            continue
-
-        # Expand if it's a separator character and unquoted
-        if letter in ";:,#+-*/=&|^><%!()'":
-            new_line += ' {0} '.format(letter)
+    is_number = False
+    arr_numbers = []
+    chr_prev = ''
+    n_prev = 0
+    i = 0
+    for str_char in str_statement:
+        if str_char in '0123456789.':
+            if not is_number:
+                is_number = True
+                n_pos = i
+                if i:
+                    chr_prev = str_statement[i - 1]
         else:
-            new_line += letter
+            if is_number:
+                is_number = False
+                str_number = str_statement[n_pos:i]
+                arr_numbers.append(
+                    [str_number, n_pos, chr_prev, str_statement[n_prev:n_pos]])
+                n_prev = i
+        i += 1
 
-    # Convert to array of possible tokens
-    try:
-        lex = shlex.shlex(new_line, posix=False)
-        lex.quotes = '"'
-        lex.scapedquotes = '"'
-        lex.whitespace_split = True
-        lex.commenters = ''
-        arr_line = list(lex)
-    except:
-        LOGGER.error(line)
-        raise
+    if is_number:
+        str_number = str_statement[n_pos:i]
+        arr_numbers.append(
+            [str_number, n_pos, chr_prev, str_statement[n_prev:n_pos]])
+        n_prev = i
 
-    arr_result = []
-    # Special cases: OPEN#, CLOSE#, >>, << ,<>, >=, <=, DEF FN, GO TO, GO SUB
-    for word in arr_line:
-        if word == '#' and len(arr_result) > 1:
-            if arr_result[-1].upper() in ['OPEN', 'CLOSE']:
-                arr_result[-1] = arr_result[-1] + word
-                continue
-        elif word in '><' and len(arr_result) > 1:
-            if arr_result[-1] == word:
-                arr_result[-1] = arr_result[-1] + word
-                continue
-            if word == '>' and arr_result[-1] == '<':
-                arr_result[-1] = arr_result[-1] + word
-                continue
-        elif word == '=' and len(arr_result) > 1:
-            if arr_result[-1] in '><':
-                arr_result[-1] = arr_result[-1] + word
-                continue
-        elif word == 'FN' and len(arr_result) > 1:
-            if arr_result[-1].upper() == 'DEF':
-                arr_result[-1] = arr_result[-1] + ' {0}'.format(word)
-                continue
-        elif word in ['TO', 'SUB'] and len(arr_result) > 1:
-            if arr_result[-1].upper() == 'GO':
-                arr_result[-1] = arr_result[-1] + ' {0}'.format(word)
-                continue
+    str_post = str_statement[n_prev:i]
 
-        arr_result.append(word)
+    str_result = ''
+    for str_num, n_pos, chr_prev, str_prev in arr_numbers:
+        bin_num = str_num
+        if chr_prev == '\xc4':
+            LOGGER.debug('BIN {0}'.format(str_num))
+            det_bin = re.compile('^[01]{8}$')
+            match_det = det_bin.match(str_num)
+            if match_det:
+                int_num = int(str_num, base=2)
+                bin_num = u'{0}\x0e'.format(str_num)
+                bin_num += u'\x00\x00{0}\x00\x00'.format(chr(int_num))
+        else:
+            LOGGER.debug('NUM {0}'.format(str_num))
+            if str_num != '.':
+                bin_num = convert_number(str_num)
+                bin_num = '{0}\x0e{1}'.format(str_num, bin_num)
 
-    if comment:
-        arr_result.append(comment)
+        str_result += str_prev + bin_num
 
-    return arr_result
+    str_result += str_post
+
+    return str_result
+
+
+def convert_number(strnum):
+    """ Detect if string it's a number and then the type (int, float),
+    then try to convert using Sinclair BASIC 5-byte number format
+    (http://fileformats.archiveteam.org/wiki/Sinclair_BASIC_tokenized_file#5-byte_numeric_format)
+    """
+
+    c = None
+    det_int = re.compile('[+-]?[0-9]+$')
+    match_int = det_int.match(strnum)
+    if match_int:
+        LOGGER.debug('int: {0}'.format(strnum))
+        newint = int(strnum)
+        c = convert_int(newint)
+
+    det_float = re.compile('[+-]?([0-9]*)?[.][0-9]+$')
+    match_float = det_float.match(strnum)
+    if match_float:
+        LOGGER.debug('float: {0}'.format(strnum))
+        newfloat = float(strnum)
+        c = convert_float(newfloat)
+
+    s = ''
+    for b_char in c:
+        s += chr(b_char)
+    return s
+
+
+def convert_int(newint):
+    """Convert int to bytes using 5-byte Sinclair format"""
+
+    if newint < 65536 and newint > -65536:
+        LOGGER.debug('int->{0}'.format(newint))
+        if newint < 0:
+            b = b'\x00\xff'
+            newint += 65536
+        else:
+            b = b'\x00\x00'
+        c = newint.to_bytes(2, byteorder='little', signed=False)
+        b = b''.join([b, c, b'\x00'])
+        return b
+    else:
+        return convert_float(float(newint))
+
+
+def convert_float(newfloat):
+    """Convert float to bytes using 5-byte Sinclair format"""
+
+    if newfloat != 0.0:
+        LOGGER.debug('float->{0}'.format(newfloat))
+        b_sign = '0'
+        normalized = False
+        if newfloat < 0.0:
+            b_sign = '1'
+            newfloat = abs(newfloat)
+
+        intpart = int(newfloat)
+        mantissa = '{0:b}'.format(intpart)
+        if intpart == 0:
+            mantissa = ''
+        else:
+            normalized = True
+        newexp = len(mantissa)
+
+        fractpart = newfloat - intpart
+        i = 0
+        fractbin = ''
+        while i < 33:
+            fractpart *= 2
+            if int(fractpart) > 0:
+                if not normalized:
+                    normalized = True
+                    fractbin = fractbin[i:]
+                    i = 0
+                fractpart -= int(fractpart)
+                fractbin += '1'
+            else:
+                if not normalized:
+                    newexp -= 1
+                fractbin += '0'
+            i += 1
+
+        fractint = int(fractbin, 2)
+        if newexp < 0:
+            fractint -= 1
+        fractint = '{0:033b}'.format(fractint)
+
+        mantissa += fractint
+        mantissa = b_sign + mantissa[1:]
+
+        b = '{0:08b}'.format(128 + newexp)
+        b += mantissa
+        if b[40] == '1':
+            b = b[:39] + '1'
+        b = int(b[:40], 2)
+        b = b.to_bytes(5, byteorder='big', signed=False)
+
+        return b
+    else:
+        return convert_int(0)
 
 
 #Classes
@@ -369,7 +557,6 @@ class Plus3DosFile(object):
             checksum += arr_bytes[i]
         checksum %= 256
         arr_bytes += (checksum).to_bytes(1, 'little')
-        # arr_bytes += (self.checksum).to_bytes(1, 'little')
         arr_bytes += self.content
 
         return arr_bytes
@@ -390,9 +577,7 @@ class Plus3DosFileHeader(object):
       000000 (...) 0000  Bytes 23...126   - Reserved (set to 0)
       D7                 Byte 127 - Checksum (sum of bytes 0...126 modulo 256)
       (BASIC Program)
-
         Notes for a file named: "nnnnnnnnn.bin":
-
         504C5553 33444F53 1A0100           -> Bytes 0...10
         187 + n bytes (file)               -> Bytes 11...14 least significant byte in lowest address
         00                                 -> Byte  15
@@ -426,265 +611,11 @@ class Plus3DosFileHeader(object):
         return arr_bytes
 
 
-class Basic(object):
-    """ Class for a simple BASIC tokenizer
-
-        Originally obtained from ZX Basic libraries
-        https://zxbasic.readthedocs.io/en/latest/
-    
-        Copyleft (K) 2008, Jose Rodriguez-Rosa (a.k.a. Boriel)
-        <http://www.boriel.com>
-    """
-    def __init__(self):
-        self.bytes = [
-        ]  # Array of bytes containing a ZX Spectrum BASIC program
-        self.current_line = 0  # Current basic_line
-
-    def line_number(self, number):
-        """ Returns the bytes for a line number.
-        This is BIG ENDIAN for the ZX Basic
-        """
-        numberH = (number & 0xFF00) >> 8
-        numberL = number & 0xFF
-
-        return [numberH, numberL]
-
-    def numberLH(self, number):
-        """ Returns the bytes for 16 bits number.
-        This is LITTLE ENDIAN for the ZX Basic
-        """
-        numberH = (number & 0xFF00) >> 8
-        numberL = number & 0xFF
-
-        return [numberL, numberH]
-
-    def convert(self, strnum, strprev):
-        """ Detect if string it's a number and then the type (binary, int, float),
-        then try to convert using Sinclair BASIC 5-byte number format
-        (http://fileformats.archiveteam.org/wiki/Sinclair_BASIC_tokenized_file#5-byte_numeric_format)
-        """
-
-        c = None
-
-        if strprev.upper() == 'BIN':
-            det_int = re.compile('[01]{8}$')
-            match_int = det_int.match(strnum)
-            if match_int:
-                LOGGER.debug('bin: {0}'.format(strnum))
-                newint = int(strnum, base=2)
-                c = self.convert_bin(newint)
-        else:
-            det_int = re.compile('[+-]?[0-9]+$')
-            match_int = det_int.match(strnum)
-            if match_int:
-                LOGGER.debug('int: {0}'.format(strnum))
-                newint = int(strnum)
-                c = self.convert_int(newint)
-
-            det_float = re.compile('[+-]?([0-9]*)?[.][0-9]+$')
-            match_float = det_float.match(strnum)
-            if match_float:
-                LOGGER.debug('float: {0}'.format(strnum))
-                newfloat = float(strnum)
-                c = self.convert_float(newfloat)
-
-        if c:
-            b = strnum.encode('utf-8')
-            c = b''.join([b, b'\x0e', c])
-
-        return c
-
-    def convert_int(self, newint):
-        """Convert int to bytes using 5-byte Sinclair format"""
-
-        if newint < 65536 and newint > -65536:
-            LOGGER.debug('int->{0}'.format(newint))
-            if newint < 0:
-                b = b'\x00\xff'
-                newint += 65536
-            else:
-                b = b'\x00\x00'
-            c = newint.to_bytes(2, byteorder='little', signed=False)
-            b = b''.join([b, c, b'\x00'])
-            return b
-        else:
-            return self.convert_float(float(newint))
-
-    def convert_float(self, newfloat):
-        """Convert float to bytes using 5-byte Sinclair format"""
-
-        if newfloat != 0.0:
-            LOGGER.debug('float->{0}'.format(newfloat))
-            b_sign = '0'
-            normalized = False
-            if newfloat < 0.0:
-                b_sign = '1'
-                newfloat = abs(newfloat)
-
-            intpart = int(newfloat)
-            mantissa = '{0:b}'.format(intpart)
-            if intpart == 0:
-                mantissa = ''
-            else:
-                normalized = True
-            newexp = len(mantissa)
-
-            fractpart = newfloat - intpart
-            i = 0
-            fractbin = ''
-            while i < 33:
-                fractpart *= 2
-                if int(fractpart) > 0:
-                    if not normalized:
-                        normalized = True
-                        fractbin = fractbin[i:]
-                        i = 0
-                    fractpart -= int(fractpart)
-                    fractbin += '1'
-                else:
-                    if not normalized:
-                        newexp -= 1
-                    fractbin += '0'
-                i += 1
-
-            fractint = int(fractbin, 2)
-            if newexp < 0:
-                fractint -= 1
-            fractint = '{0:033b}'.format(fractint)
-
-            mantissa += fractint
-            mantissa = b_sign + mantissa[1:]
-
-            b = '{0:08b}'.format(128 + newexp)
-            b += mantissa
-            if b[40] == '1':
-                b = b[:39] + '1'
-            b = int(b[:40], 2)
-            b = b.to_bytes(5, byteorder='big', signed=False)
-
-            return b
-        else:
-            return self.convert_int(0)
-
-    def convert_bin(self, newbin):
-        """Convert bin to bytes using 5-byte Sinclair format"""
-        LOGGER.debug('bin->{0}'.format(newbin))
-        c = newbin.to_bytes(1, byteorder='big', signed=False)
-        b = b''.join([b'\x00\x00', c, b'\x00\x00'])
-        return b
-
-    def token(self, string):
-        """ Return the token for the given word
-        """
-        string = string.upper()
-
-        return [TOKENS[string]]
-
-    def literal(self, string):
-        """ Return the current string "as is"
-        in bytes
-        """
-        return [ord(x) for x in string]
-
-    def parse_sentence(self, string):
-        """ Parses the given sentence. BASIC commands must be
-        types UPPERCASE and as SEEN in ZX BASIC. e.g. GO SUB for gosub, etc...
-        """
-
-        result = []
-
-        def shift(string_):
-            """ Returns first word of a string, and remaining
-            """
-            string_ = string_.strip()  # Remove spaces and tabs
-
-            if not string_:  # Avoid empty strings
-                return '', ''
-
-            i = string_.find(' ')
-            if i == -1:
-                command_ = string_
-                string_ = ''
-            else:
-                command_ = string_[:i]
-                string_ = string_[i:]
-
-            return command_, string_
-
-        command, string = shift(string)
-        while command != '':
-            result += self.token(command)
-
-    def sentence_bytes(self, sentence):
-        """ Return bytes of a sentence.
-        This is a very simple parser. Sentence is a list of strings and numbers.
-        1st element of sentence MUST match a token.
-        """
-
-        result = []
-        prev_i = ''
-        for i in sentence:
-            try:
-                word = int(i)
-            except:
-                try:
-                    word = float(i)
-                except:
-                    word = i
-
-            if isinstance(word, str):
-                if word.upper() in TOKENS:  # A token
-                    result.extend([TOKENS[word.upper()]])
-                elif word[0] == '.':  # Extended dot command
-                    word = ' {0} '.format(word)
-                    result.extend(self.literal(word))
-                else:  # Plain text
-                    result.extend(self.literal(word))
-            elif isinstance(word, float) or isinstance(word, int):  # A number?
-                result.extend(self.convert(i, prev_i))
-            else:
-                result.extend(word)  # Another thing
-
-            prev_i = i
-
-        return result
-
-    def line(self, sentences, line_number=None):
-        """ Return the bytes for a basic line.
-        If no line number is given, current one + 10 will be used
-        Sentences if a list of sentences
-        """
-        if line_number is None:
-            line_number = self.current_line + 10
-        self.current_line = line_number
-
-        sep = []
-        result = []
-        for sentence in sentences:
-            result.extend(sep)
-            result.extend(self.sentence_bytes(sentence))
-            sep = [ord(':')]
-
-        result.extend([ENTER])
-        result = self.line_number(line_number) + self.numberLH(
-            len(result)) + result
-
-        return result
-
-    def add_line(self, sentences, line_number=None):
-        """ Add current line to the output.
-        See self.line() for more info
-        """
-        self.bytes += self.line(sentences, line_number)
-
-
 # Constants
 # ---------
 
-ENTER = 0x0D
-
 TOKENS = {
-    'PEEK$': 135,
+    'PEEK\\$': 135,
     'REG': 136,
     'DPOKE': 137,
     'DPEEK': 138,
@@ -693,7 +624,6 @@ TOKENS = {
     '>>': 141,
     'UNTIL': 142,
     'ERROR': 143,
-    'ON': 144,
     'DEFPROC': 145,
     'ENDPROC': 146,
     'PROC': 147,
@@ -715,15 +645,13 @@ TOKENS = {
     'SPECTRUM': 163,
     'PLAY': 164,
     'RND': 165,
-    'INKEY$': 166,
+    'INKEY\\$': 166,
     'PI': 167,
-    'FN': 168,
     'POINT': 169,
-    'SCREEN$': 170,
+    'SCREEN\\$': 170,
     'ATTR': 171,
-    'AT': 172,
     'TAB': 173,
-    'VAL$': 174,
+    'VAL\\$': 174,
     'CODE': 175,
     'VAL': 176,
     'LEN': 177,
@@ -735,33 +663,28 @@ TOKENS = {
     'ATN': 183,
     'LN': 184,
     'EXP': 185,
-    'INT': 186,
     'SQR': 187,
     'SGN': 188,
     'ABS': 189,
     'PEEK': 190,
-    'IN': 191,
     'USR': 192,
-    'STR$': 193,
-    'CHR$': 194,
+    'STR\\$': 193,
+    'CHR\\$': 194,
     'NOT': 195,
     'BIN': 196,
-    'OR': 197,
-    'AND': 198,
     '<=': 199,
     '>=': 200,
     '<>': 201,
     'LINE': 202,
     'THEN': 203,
-    'TO': 204,
     'STEP': 205,
     'DEF FN': 206,
     'CAT': 207,
     'FORMAT': 208,
     'MOVE': 209,
     'ERASE': 210,
-    'OPEN#': 211,
-    'CLOSE#': 212,
+    'OPEN #': 211,
+    'CLOSE #': 212,
     'MERGE': 213,
     'VERIFY': 214,
     'BEEP': 215,
@@ -804,7 +727,15 @@ TOKENS = {
     'DRAW': 252,
     'CLEAR': 253,
     'RETURN': 254,
-    'COPY': 255
+    'COPY': 255,
+    'ON': 144,
+    'FN': 168,
+    'AT': 172,
+    'INT': 186,
+    'IN': 191,
+    'OR': 197,
+    'AND': 198,
+    'TO': 204
 }
 
 CHARS = {
