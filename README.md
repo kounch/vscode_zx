@@ -22,7 +22,7 @@ Works best if used with [ZX Spectrum BASIC syntax highlighting for Visual Studio
 
 - **Visual Studio Code**. Docs, downloads, etc. [here](https://code.visualstudio.com/)
 
-- **Python 3.x**. Docs, downloads, etc. [here](https://www.python.org/)
+- **Python (version 3.6 or later)**. Docs, downloads, etc. [here](https://www.python.org/)
 
 - **ZX Basic**. Version 1.8.10 or later (.zip or .tar.gz). Docs, download, etcs. [here](https://zxbasic.readthedocs.io)
 
@@ -134,6 +134,8 @@ On MacOS:
 
 The tasks and scripts are designed to deal with text files, with `.bas` extension, and encoded using UTF-8, with windows line endings (CRLF).
 
+NextBASIC keywords must be written always in uppercase (this offers compatibility with programs that use variable names similar to keywords).
+
 You can use [unicode block elements](https://en.wikipedia.org/wiki/Block_Elements) which will be automatically converted. Also , it is possible to have non-printable characters, using `` ` `` as escape code, and then the desired code, as a decimal or hexadecimal number (in this case preceded by "`x`"). For example, use `` `16`2`17`6`` or `` `x10`x02`x11`x06`` to send red ink and yellow paper codes.
 
 A list of Sinclair codes is available [at this link](https://www.worldofspectrum.org/ZXBasicManual/zxmanappa.html). For ZX Spectrum Next codes see appendix A, in the official manual.
@@ -230,7 +232,7 @@ Se recomienda usar junto con el plugin [ZX Spectrum BASIC syntax highlighting fo
 
 - **Visual Studio Code**. Documentación, descarga, etc. [aquí](https://code.visualstudio.com/)
 
-- **Python 3.x**. Documentación, descarga, etc. [aquí](https://www.python.org/)
+- **Python (versión 3.6 o superior)**. Documentación, descarga, etc. [aquí](https://www.python.org/)
 
 - **ZX Basic**. Documentación, descarga, etc. [aquí](https://zxbasic.readthedocs.io). Se necesita, al menos, la versión 1.8.10 (en formato .zip o .tar.gz)
 
@@ -345,6 +347,8 @@ En el caso de MacOS
 #### Ficheros BAS
 
 Las tareas y scripts están diseñados para tratar con ficheros de texto, con extensión `.bas`, con codificación UTF-8, con saltos de línea windows (CRLF).
+
+Las palabras clave de NextBASIC deben estar siempre en mayúsculas (esto ofrece compatibilidad con programas que usan nombres de variable iguales a los nombres de alguna palabra clave).
 
 Es posible utilizar [caracteres unicode de bloques](https://en.wikipedia.org/wiki/Block_Elements) que serán automáticamente convertidos, así como caracteres no imprimibles, usando `` ` `` como código de escape y luego el código correspondiente, bien en decimal, o bien en hexadecimal (precedido por "`x`"). Por ejemplo, para indicar tinta roja y papel amarillo: `` `16`2`17`6``. o bien `` `x10`x02`x11`x06``.
 
