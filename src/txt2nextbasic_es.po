@@ -21,7 +21,7 @@ msgid "You need version 3.6 or later of Python"
 msgstr "Se necesita al menos la versión 3.6 de Python"
 
 msgid "Cannot parse line: {0}"
-msgid "No se pudo procesar la línea: {0}"
+msgstr "No se pudo procesar la línea: {0}"
 
 msgid "Path not found: {0}"
 msgstr "Ruta no encontrada: {0}"
