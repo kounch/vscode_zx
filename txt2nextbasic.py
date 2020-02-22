@@ -83,25 +83,26 @@ def main():
         for line in code:
             line = line.strip()
             arr_line = line.split(' ', -1)
-            if line and line[
-                    0] != '#':  #  Comments and directives aren't parsed
-                arr_line = proc_basic(line)
-                if arr_line:
-                    basic_data.append(arr_line)  # Parse BASIC
-            elif line.startswith('#program'):
-                if not arg_data['output']:
+            if line:
+                # Comments and directives aren't parsed
+                if line[0] != '#':
+                    arr_line = proc_basic(line)
+                    if arr_line:
+                        basic_data.append(arr_line)  # Parse BASIC
+                elif line.startswith('#program'):
+                    if not arg_data['output']:
+                        if len(arr_line) > 1:
+                            arg_data['output'] = arg_data['input'].with_name(
+                                arr_line[1] + '.bas')
+                elif line.startswith('#autostart'):
                     if len(arr_line) > 1:
-                        arg_data['output'] = arg_data['input'].with_name(
-                            arr_line[1] + '.bas')
-            elif line.startswith('#autostart'):
-                if len(arr_line) > 1:
-                    load_addr = int(arr_line[1])
+                        load_addr = int(arr_line[1])
+                    else:
+                        load_addr = 0
                 else:
-                    load_addr = 0
-            else:
-                str_msg = _('Cannot parse line: {0}')
-                LOGGER.error(str_msg.format(line))
-                raise RuntimeError(str_msg)
+                    str_msg = _('Cannot parse line: {0}')
+                    LOGGER.error(str_msg.format(line))
+                    raise RuntimeError(str_msg)
 
         file_content = b''.join(basic_data)
 
@@ -209,13 +210,13 @@ def proc_basic(line):
     arr_statements = extract_statements(line)  # Split quoted strings and ':'
 
     line_bin = ''
-    for str_statement in arr_statements:
-        if str_statement:
-            if str_statement[0] != '"':
-                str_statement = process_tokens(str_statement)
-                str_statement = process_params(str_statement)
-                str_statement = process_numbers(str_statement)
-        line_bin += str_statement
+    for str_sttmnt in arr_statements:
+        if str_sttmnt:
+            if str_sttmnt[0] != '"' and str_sttmnt.strip()[0] != '.':
+                str_sttmnt = process_tokens(str_sttmnt)
+                str_sttmnt = process_params(str_sttmnt)
+                str_sttmnt = process_numbers(str_sttmnt)
+        line_bin += str_sttmnt
     line_bin += comment + '\x0d'
     line_bin = [ord(c) for c in line_bin]
     line_bin = bytes(line_bin)
@@ -475,8 +476,9 @@ def convert_number(strnum):
 
     # Convert binary to string
     s = ''
-    for b_char in c:
-        s += chr(b_char)
+    if c:
+        for b_char in c:
+            s += chr(b_char)
 
     return s
 
