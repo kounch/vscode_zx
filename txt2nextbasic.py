@@ -55,6 +55,13 @@ _ = gettext.gettext
 def main():
     """Main Routine"""
 
+    #Check Python version
+    arr_v = sys.version_info
+    if arr_v[0] < 3 or (arr_v[0] == 3 and arr_v[1] < 6):
+        str_msg = _('You need version 3.6 or later of Python')
+        LOGGER.error(str_msg)
+        raise RuntimeError(str_msg)
+
     arg_data = parse_args()
 
     load_addr = 0x8000
@@ -80,7 +87,7 @@ def main():
                     0] != '#':  #  Comments and directives aren't parsed
                 arr_line = proc_basic(line)
                 if arr_line:
-                    basic_data.append(arr_line)
+                    basic_data.append(arr_line)  # Parse BASIC
             elif line.startswith('#program'):
                 if not arg_data['output']:
                     if len(arr_line) > 1:
@@ -92,7 +99,9 @@ def main():
                 else:
                     load_addr = 0
             else:
-                LOGGER.error('Cannot parse line')
+                str_msg = _('Cannot parse line: {0}')
+                LOGGER.error(str_msg.format(line))
+                raise RuntimeError(str_msg)
 
         file_content = b''.join(basic_data)
 
@@ -188,12 +197,16 @@ def parse_args():
 
 
 def proc_basic(line):
-    """Does processing on a BASIC line"""
+    """
+       Does processing on a BASIC line, replacing text tokens, params, numbers,
+       etc. with Sinclair ASCII characters. It also extracts line number apart.
+       Data is returned as bytes.
+    """
 
-    line_number, line = extract_linenumber(line)
-    line = convert_char(line)
-    line, comment = extract_comment(line)
-    arr_statements = extract_statements(line)
+    line_number, line = extract_linenumber(line)  # Line number as int
+    line = convert_char(line)  # Replace all known UTF-9 characters
+    line, comment = extract_comment(line)  # REM comments won't be parsed
+    arr_statements = extract_statements(line)  # Split quoted strings and ':'
 
     line_bin = ''
     for str_statement in arr_statements:
@@ -202,18 +215,14 @@ def proc_basic(line):
                 str_statement = process_tokens(str_statement)
                 str_statement = process_params(str_statement)
                 str_statement = process_numbers(str_statement)
-
         line_bin += str_statement
-
     line_bin += comment + '\x0d'
-
     line_bin = [ord(c) for c in line_bin]
-    line_len = len(line_bin)
-
-    line_number = line_number.to_bytes(2, byteorder='big')
-    line_len = line_len.to_bytes(2, byteorder='little')
     line_bin = bytes(line_bin)
 
+    line_number = line_number.to_bytes(2, byteorder='big')
+    line_len = len(line_bin)
+    line_len = line_len.to_bytes(2, byteorder='little')
     line_bin = b''.join([line_number, line_len, line_bin])
 
     return line_bin
@@ -234,9 +243,9 @@ def extract_linenumber(line):
 def convert_char(line):
     """Converts non-ASCII characters from UTF-8 to Sinclair ASCII"""
 
-    # Escape conversion
-    arr_line = line.split('`')  # Split using escape ` char
+    # Escape characters conversion
     n_line = ''
+    arr_line = line.split('`')  # Split using escape ` char
     if arr_line:
         n_line = arr_line[0]
         for p_line in arr_line[1:]:
@@ -255,7 +264,7 @@ def convert_char(line):
                 n_line += p_line
     line = n_line
 
-    # UTF Char conversion
+    # UTF Char conversion (Block Graphics, etc)
     for s_char in CHARS:
         line = line.replace(s_char, CHARS[s_char])
 
@@ -263,7 +272,7 @@ def convert_char(line):
 
 
 def extract_comment(line):
-    """Extracts ; and REM comments from line"""
+    """Splits line into line and ;/REM comment strings"""
 
     # Detect ; and REM comments
     comment = ''
@@ -286,7 +295,7 @@ def extract_comment(line):
 
 
 def extract_statements(line):
-    """Converts line to array with quoted elements and statements isolated"""
+    """Converts line to array with quoted elements and statements as members"""
 
     arr_line = []
     # Split quoted elements
@@ -297,32 +306,35 @@ def extract_statements(line):
             if b_quote:
                 b_quote = False
                 elem_line += letter
-                arr_line.append(elem_line)
+                arr_line.append(elem_line)  # End quote: Append to list
                 elem_line = u''
                 continue
             else:
-                arr_line.append(elem_line)
+                arr_line.append(elem_line)  # Start quote. Split and append
                 elem_line = u''
                 b_quote = True
 
         elem_line += letter
     if elem_line:
-        arr_line.append(elem_line)
+        arr_line.append(elem_line)  # Add ending string if not empty
 
+    # Split statements using ':'
     arr_statements = []
     for elem_line in arr_line:
         if elem_line:
             if elem_line[0] == u'"':
-                arr_statements.append(elem_line)
+                arr_statements.append(elem_line)  # Quoted strings kept as is
             else:
                 i = prev_i = 0
                 for str_char in elem_line:
                     if str_char == u':':
-                        arr_statements.append(elem_line[prev_i:i])
+                        arr_statements.append(
+                            elem_line[prev_i:i])  # Split on :
                         prev_i = i
                     i += 1
                 if prev_i < i:
-                    arr_statements.append(elem_line[prev_i:i])
+                    arr_statements.append(
+                        elem_line[prev_i:i])  # Last statement
 
     return arr_statements
 
@@ -331,7 +343,7 @@ def process_tokens(str_statement):
     """ Converts token strings to Sinclair ASCII"""
 
     for token in TOKENS:
-        chr_token = chr(TOKENS[token])
+        chr_token = chr(TOKENS[token])  # Dictionaries are ordereded since 3.6
         det_t = re.compile('(\\s*{0}\\s*)'.format(token))
         find_t = det_t.findall(str_statement)
         if find_t:
@@ -342,9 +354,13 @@ def process_tokens(str_statement):
 
 
 def process_params(str_statement):
-    """Parses statement and expands parameters to 5-byte format"""
+    """
+        Parses statement and expands parameters to 5-byte format.
+        Statement MUST have tokens converted to Sinclair ASCII
+        (e.g. 0xCE instead of DEF FN)
+    """
 
-    # Detect and prepare DEF FN parameters
+    # Detect DEF FN parameters
     det_params = re.compile('(.*\xCE[^\\(]*\\()([^\\)]*)(\\).*)')
     match_det = det_params.match(str_statement)
     if match_det:
@@ -355,6 +371,11 @@ def process_params(str_statement):
             arr_line = []
             for param in arr_params:
                 param = param.strip()
+                # Analyzing basic programs, looks like DEF FN parameters are
+                # identified like numbers (using 0x0E as marker) and then
+                # filled with arbitrary data on definition, and dynamically
+                # replaced with other data on runtime, so we take an easy
+                # approach, and use dashes to fill the space
                 arr_line.append('{0}\x0e-----'.format(param))
             str_params = ','.join(arr_line)
         str_statement += str_params
@@ -371,6 +392,7 @@ def process_numbers(str_statement):
     chr_prev = ''
     n_prev = 0
     i = 0
+    # Compose a list of all possible numbers in statement, split accordingly
     for str_char in str_statement:
         if str_char in '0123456789.':
             if not is_number:
@@ -383,38 +405,47 @@ def process_numbers(str_statement):
                 is_number = False
                 str_number = str_statement[n_pos:i]
                 arr_numbers.append(
+                    # Number as string, position, previous char and previous
+                    # part of statement
                     [str_number, n_pos, chr_prev, str_statement[n_prev:n_pos]])
                 n_prev = i
         i += 1
 
     if is_number:
+        # We still have one remaining number to process
         str_number = str_statement[n_pos:i]
         arr_numbers.append(
             [str_number, n_pos, chr_prev, str_statement[n_prev:n_pos]])
         n_prev = i
 
+    # Save remaining text of statement (without numbers inside)
     str_post = str_statement[n_prev:i]
 
+    # Read list of numbers and compose the expanded statement
     str_result = ''
     for str_num, n_pos, chr_prev, str_prev in arr_numbers:
-        bin_num = str_num
-        if chr_prev == '\xc4':
-            LOGGER.debug('BIN {0}'.format(str_num))
+        bin_num = str_num  # By default, the number is not expanded
+        str_result += str_prev  # Append text prepending number
+
+        if chr_prev == '\xc4':  # BIN number
+            LOGGER.debug('bin: {0}'.format(str_num))
             det_bin = re.compile('^[01]{8}$')
             match_det = det_bin.match(str_num)
             if match_det:
-                int_num = int(str_num, base=2)
-                bin_num = u'{0}\x0e'.format(str_num)
+                int_num = int(str_num, base=2)  # Binary text to int
+                bin_num = u'{0}\x0e'.format(
+                    str_num)  # Sinclair BASIC number marker
+                # Looks like BIN nubers are saved using one byte surrounded by 0s
                 bin_num += u'\x00\x00{0}\x00\x00'.format(chr(int_num))
-        else:
-            LOGGER.debug('NUM {0}'.format(str_num))
-            if str_num != '.':
-                bin_num = convert_number(str_num)
+        else:  # Other kind of number
+            LOGGER.debug('Number: {0}'.format(str_num))
+            if str_num != '.':  # Only valid floats allowed
+                bin_num = convert_number(str_num)  # Expand int or float
                 bin_num = '{0}\x0e{1}'.format(str_num, bin_num)
 
-        str_result += str_prev + bin_num
+        str_result += bin_num
 
-    str_result += str_post
+    str_result += str_post  # Recover remaining text of statement
 
     return str_result
 
@@ -426,6 +457,7 @@ def convert_number(strnum):
     """
 
     c = None
+    # Integer
     det_int = re.compile('[+-]?[0-9]+$')
     match_int = det_int.match(strnum)
     if match_int:
@@ -433,6 +465,7 @@ def convert_number(strnum):
         newint = int(strnum)
         c = convert_int(newint)
 
+    # Float
     det_float = re.compile('[+-]?([0-9]*)?[.][0-9]+$')
     match_float = det_float.match(strnum)
     if match_float:
@@ -440,9 +473,11 @@ def convert_number(strnum):
         newfloat = float(strnum)
         c = convert_float(newfloat)
 
+    # Convert binary to string
     s = ''
     for b_char in c:
         s += chr(b_char)
+
     return s
 
 
@@ -451,15 +486,20 @@ def convert_int(newint):
 
     if newint < 65536 and newint > -65536:
         LOGGER.debug('int->{0}'.format(newint))
-        if newint < 0:
+        if newint < 0:  # Negative, so two's complement is needed
             b = b'\x00\xff'
             newint += 65536
         else:
             b = b'\x00\x00'
+
         c = newint.to_bytes(2, byteorder='little', signed=False)
+
+        # To bytes
         b = b''.join([b, c, b'\x00'])
+
         return b
     else:
+        # Out of range, must be treated as float
         return convert_float(float(newint))
 
 
@@ -468,62 +508,76 @@ def convert_float(newfloat):
 
     if newfloat != 0.0:
         LOGGER.debug('float->{0}'.format(newfloat))
+
+        # Extract sign and absolute value
         b_sign = '0'
         normalized = False
         if newfloat < 0.0:
             b_sign = '1'
             newfloat = abs(newfloat)
 
+        # Process integer part
         intpart = int(newfloat)
         mantissa = '{0:b}'.format(intpart)
         if intpart == 0:
             mantissa = ''
         else:
             normalized = True
+
+        # Base exponent, possibly not normalized yet
         newexp = len(mantissa)
 
+        # Process fractional part
         fractpart = newfloat - intpart
-        i = 0
+        i = 0  # Bit counter
         fractbin = ''
+        # Bit by bit, one extra bit for rounding reasons
         while i < 33:
             fractpart *= 2
             if int(fractpart) > 0:
                 if not normalized:
                     normalized = True
                     fractbin = fractbin[i:]
-                    i = 0
+                    i = 0  # Normalizing, so more bits are needed
                 fractpart -= int(fractpart)
                 fractbin += '1'
             else:
                 if not normalized:
-                    newexp -= 1
+                    newexp -= 1  # Normalizing
                 fractbin += '0'
             i += 1
+        fractint = int(fractbin, 2)  # Convert binary string to int
 
-        fractint = int(fractbin, 2)
-        if newexp < 0:
+        if newexp < 0:  # Negative exponent, adjust fractional part
             fractint -= 1
-        fractint = '{0:033b}'.format(fractint)
 
+        fractint = '{0:033b}'.format(fractint)  # To string again
+
+        # Compose mantisa
         mantissa += fractint
         mantissa = b_sign + mantissa[1:]
 
-        b = '{0:08b}'.format(128 + newexp)
-        b += mantissa
+        # Format exponent
+        b = '{0:08b}'.format(128 + newexp)  #To string
+
+        b += mantissa  # Final bits
+
+        # Rounding using bit #41
         if b[40] == '1':
             b = b[:39] + '1'
         b = int(b[:40], 2)
+
+        # To bytes
         b = b.to_bytes(5, byteorder='big', signed=False)
 
         return b
     else:
+        # 0 is always treated as int
         return convert_int(0)
 
 
 #Classes
 #-------
-
-
 class Plus3DosFile(object):
     """+3DOS File Object"""
     def __init__(self, filetype=0, content=None, load_addr=0x8000):

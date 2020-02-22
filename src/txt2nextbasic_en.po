@@ -17,6 +17,12 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid "You need version 3.6 or later of Python"
+msgstr "You need version 3.6 or later of Python"
+
+msgid "Cannot parse line: {0}"
+msgid "Cannot parse line: {0}"
+
 msgid "Path not found: {0}"
 msgstr "Path not found: {0}"
 
