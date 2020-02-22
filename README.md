@@ -2,6 +2,8 @@
 
 Visual Studio Code Tasks and Scripts for NextBASIC and ZX Basic
 
+[![Demo Video](./img/Demo_01.jpg)](./img/Demo_01.mp4 "Demo")
+
 Features:
 
 - NextBASIC text to `.bas` file converter
