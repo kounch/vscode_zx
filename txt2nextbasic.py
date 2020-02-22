@@ -244,6 +244,10 @@ def extract_linenumber(line):
 def convert_char(line):
     """Converts non-ASCII characters from UTF-8 to Sinclair ASCII"""
 
+    # UTF Char conversion (Block Graphics, etc)
+    for s_char in CHARS:
+        line = line.replace(s_char, CHARS[s_char])
+
     # Escape characters conversion
     n_line = ''
     arr_line = line.split('`')  # Split using escape ` char
@@ -264,11 +268,6 @@ def convert_char(line):
             else:
                 n_line += p_line
     line = n_line
-
-    # UTF Char conversion (Block Graphics, etc)
-    for s_char in CHARS:
-        line = line.replace(s_char, CHARS[s_char])
-
     return line
 
 
@@ -277,14 +276,16 @@ def extract_comment(line):
 
     # Detect ; and REM comments
     comment = ''
-    det_comm = re.compile(
-        '(\\s*\\d*\\s*(?:;|REM\\s?))(.*)')  # Comments at start of line
+    det_comm = re.compile('(\\s*\\d*\\s*(?:;|REM\\s?))(.*)', re.MULTILINE
+                          | re.DOTALL)  # Comments at start of line
     match_comm = det_comm.match(line)
     if match_comm:
+        print('grupos: {0}'.format(len(match_comm.groups())))
         line = match_comm.group(1)
         comment = match_comm.group(2)
     else:
-        det_comm = re.compile('(.*:\\s*(?:;|REM\\s?))(.*)')  # Comments after :
+        det_comm = re.compile('(.*:\\s*(?:;|REM\\s?))(.*)',
+                              re.MULTILINE | re.DOTALL)  # Comments after :
         match_comm = det_comm.match(line)
         if match_comm:
             n_line = match_comm.group(1)
