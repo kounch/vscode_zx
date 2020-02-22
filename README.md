@@ -9,7 +9,7 @@ Features:
 - NextBASIC text to `.bas` file converter
 - NextBASIC text renumbering
 - Converts [unicode block elements](https://en.wikipedia.org/wiki/Block_Elements) to Sinclair block graphics
-- Support of non-printable characters using ` as escape character
+- Supports non-printable characters using ` as escape character
 - Task support to compile with ZX Basic
 - Task integration to build (or convert) and run in ZEsarUX and CSpect emulators
 - Works with Windows, MacOS and (possibly) Linux
@@ -138,7 +138,7 @@ The tasks and scripts are designed to deal with text files, with `.bas` extensio
 
 NextBASIC keywords must be written always in uppercase (this offers compatibility with programs that use variable names similar to keywords).
 
-You can use [unicode block elements](https://en.wikipedia.org/wiki/Block_Elements) which will be automatically converted. Also , it is possible to have non-printable characters, using `` ` `` as escape code, and then the desired code, as a decimal or hexadecimal number (in this case preceded by "`x`"). For example, use `` `16`2`17`6`` or `` `x10`x02`x11`x06`` to send red ink and yellow paper codes.
+You can use [unicode block elements](https://en.wikipedia.org/wiki/Block_Elements) which will be automatically converted. Also , it is possible to have non-printable characters, using `` ` `` as escape code, and then the desired code, as a decimal or hexadecimal number (in this case preceded by "`x`"). For example, use `` `16`2`17`6`` or `` `x10`x02`x11`x06`` to send red ink and yellow paper codes. This method can be used too to embed little machine code routines inside of REM lines.
 
 A list of Sinclair codes is available [at this link](https://www.worldofspectrum.org/ZXBasicManual/zxmanappa.html). For ZX Spectrum Next codes see appendix A, in the official manual.
 
@@ -352,7 +352,7 @@ Las tareas y scripts están diseñados para tratar con ficheros de texto, con ex
 
 Las palabras clave de NextBASIC deben estar siempre en mayúsculas (esto ofrece compatibilidad con programas que usan nombres de variable iguales a los nombres de alguna palabra clave).
 
-Es posible utilizar [caracteres unicode de bloques](https://en.wikipedia.org/wiki/Block_Elements) que serán automáticamente convertidos, así como caracteres no imprimibles, usando `` ` `` como código de escape y luego el código correspondiente, bien en decimal, o bien en hexadecimal (precedido por "`x`"). Por ejemplo, para indicar tinta roja y papel amarillo: `` `16`2`17`6``. o bien `` `x10`x02`x11`x06``.
+Es posible utilizar [caracteres unicode de bloques](https://en.wikipedia.org/wiki/Block_Elements) que serán automáticamente convertidos, así como caracteres no imprimibles, usando `` ` `` como código de escape y luego el código correspondiente, bien en decimal, o bien en hexadecimal (precedido por "`x`"). Por ejemplo, para indicar tinta roja y papel amarillo: `` `16`2`17`6``. o bien `` `x10`x02`x11`x06``. Este método también puede utilizarse para embeber pequeñas rutinas en código máquina dentro de líneas REM.
 
 Se pueden consultar todos los códigos de Sinclair originales [en este enlace](https://www.worldofspectrum.org/ZXBasicManual/zxmanappa.html). Para ZX Spectrum Next, consultar el apéndice A del manual oficial.
 

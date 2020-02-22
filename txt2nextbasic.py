@@ -280,7 +280,6 @@ def extract_comment(line):
                           | re.DOTALL)  # Comments at start of line
     match_comm = det_comm.match(line)
     if match_comm:
-        print('grupos: {0}'.format(len(match_comm.groups())))
         line = match_comm.group(1)
         comment = match_comm.group(2)
     else:
