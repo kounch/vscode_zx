@@ -102,7 +102,7 @@ def main():
                 else:
                     str_msg = _('Cannot parse line: {0}')
                     LOGGER.error(str_msg.format(line))
-                    raise RuntimeError(str_msg)
+                    raise RuntimeError(str_msg.format(line))
 
         file_content = b''.join(basic_data)
 
