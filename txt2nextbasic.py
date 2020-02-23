@@ -389,19 +389,24 @@ def process_numbers(str_statement):
     """Parses statement and expands numbers to 5-byte format"""
 
     is_number = False
+    is_intexpr = False  # Integer in int expression (NextBASIC)
     arr_numbers = []
     chr_prev = ''
     n_prev = 0
     i = 0
     # Compose a list of all possible numbers in statement, split accordingly
     for str_char in str_statement:
-        if str_char in '0123456789.':
+        if str_char in '0123456789.' and not is_intexpr:
             if not is_number:
                 is_number = True
                 n_pos = i
                 if i:
                     chr_prev = str_statement[i - 1]
         else:
+            if str_char in '%\x8b':  # Int expression or MOD
+                is_intexpr = True
+            elif str_char in ',=' or ord(str_char) > 164:
+                is_intexpr = False
             if is_number:
                 is_number = False
                 str_number = str_statement[n_pos:i]
