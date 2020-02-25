@@ -396,19 +396,15 @@ def process_numbers(str_statement):
     i = 0
     # Compose a list of all possible numbers in statement, split accordingly
     for str_char in str_statement:
-        if str_char in '0123456789.e+-' and not is_intexpr:
+        if str_char in '0123456789.e' and not is_intexpr:
             if not is_number:
                 if str_char != 'e':
                     is_number = True
                     n_pos = i
                     if i:
                         chr_prev = str_statement[i - 1]
-            else:
-                if str_char in '+-' and str_statement[i-1] not in 'e ':
-                    is_number = False
-    
         else:
-            if str_char in '%@$\x8b':  # Int expression or MOD
+            if str_char in '%\x8b':  # Int expression or MOD
                 is_intexpr = True
             elif str_char in ',=' or ord(str_char) > 164:
                 is_intexpr = False
@@ -475,14 +471,14 @@ def convert_number(strnum):
         LOGGER.debug('int: {0}'.format(strnum))
         newint = int(strnum)
         c = convert_int(newint)
-
-    # Float
-    try:
-        newfloat = float(strnum)
-        LOGGER.debug('float: {0}'.format(strnum))
-        c = convert_float(newfloat)
-    except ValueError:
-        pass
+    else:
+        # Float
+        try:
+            newfloat = float(strnum)
+            LOGGER.debug('float: {0}'.format(strnum))
+            c = convert_float(newfloat)
+        except ValueError:
+            pass
 
     # Convert binary to string
     s = ''
