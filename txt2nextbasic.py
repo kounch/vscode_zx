@@ -237,6 +237,7 @@ def extract_linenumber(line):
     if match_det:
         line_number = match_det.group(1)
         line = match_det.group(2)
+    LOGGER.debug('LINE: {0}'.format(line_number))
 
     return int(line_number), line
 
@@ -344,7 +345,8 @@ def process_tokens(str_statement):
     """ Converts token strings to Sinclair ASCII"""
 
     for token in TOKENS:
-        chr_token = chr(TOKENS[token])  # Dictionaries are ordereded since 3.6
+        chr_token = chr(
+            TOKENS[token][0])  # Dictionaries are ordereded since 3.6
         det_t = re.compile('(\\s*{0}\\s*)'.format(token))
         find_t = det_t.findall(str_statement)
         if find_t:
@@ -390,43 +392,60 @@ def process_numbers(str_statement):
 
     is_number = False
     is_intexpr = False  # Integer in int expression (NextBASIC)
-    arr_numbers = []
+    arr_numbers = []  # Number as string, position, previous char and previous
+    # part of statement
     chr_prev = ''
     n_prev = 0
     i = 0
     # Compose a list of all possible numbers in statement, split accordingly
     for str_char in str_statement:
-        if str_char in '0123456789.e' and not is_intexpr:
+        if i:
+            chr_prev = str_statement[i - 1]
+
+        if str_char in '%\x8b':  # Int expression or MOD
+            is_intexpr = True
+        elif str_char in ',=' or ord(str_char) > 164:
+            is_intexpr = False
+
+        if not is_intexpr:
             if not is_number:
-                if str_char != 'e':
-                    is_number = True
-                    n_pos = i
-                    if i:
-                        chr_prev = str_statement[i - 1]
-        else:
-            if str_char in '%\x8b':  # Int expression or MOD
-                is_intexpr = True
-            elif str_char in ',=' or ord(str_char) > 164:
-                is_intexpr = False
-            if is_number:
-                is_number = False
-                str_number = str_statement[n_pos:i]
-                arr_numbers.append(
-                    # Number as string, position, previous char and previous
-                    # part of statement
-                    [str_number, n_pos, chr_prev, str_statement[n_prev:n_pos]])
-                n_prev = i
+                if str_char in '0123456789.':
+                    if not chr_prev or chr_prev in PRENUM:
+                        is_number = True
+                        n_pos = i
+            else:
+                testfloat = str_statement[n_pos:i + 1]
+                if (str_char not in 'e.') and not (str_char in '+-'
+                                                   and chr_prev == 'e'):
+                    try:
+                        testfloat = float(testfloat)
+                    except ValueError:
+                        is_number = False
+                        # Previous iteration had a number?
+                        testfloat = str_statement[n_pos:i]
+                        try:
+                            testfloat = float(testfloat)
+                            inc_arr_numbers(str_statement, n_pos, i, n_prev,
+                                            arr_numbers)
+                            n_prev = i
+                        except:
+                            pass  #Not a number
         i += 1
 
     if is_number:
-        # We still have one remaining number to process
-        str_number = str_statement[n_pos:i]
-        arr_numbers.append(
-            [str_number, n_pos, chr_prev, str_statement[n_prev:n_pos]])
-        n_prev = i
+        # We may still have one remaining number to process
+        try:
+            testfloat = float(str_statement[n_pos:i])
+            inc_arr_numbers(str_statement, n_pos, i, n_prev, arr_numbers)
+            n_prev = i
+        except ValueError:
+            if len(str_statement) > 1:
+                inc_arr_numbers(str_statement, n_pos, i - 1, n_prev,
+                                arr_numbers)
+                n_prev = i
 
     # Save remaining text of statement (without numbers inside)
-    str_post = str_statement[n_prev:i]
+    str_post = str_statement[n_prev:]
 
     # Read list of numbers and compose the expanded statement
     str_result = ''
@@ -445,7 +464,7 @@ def process_numbers(str_statement):
                 # Looks like BIN nubers are saved using one byte surrounded by 0s
                 bin_num += u'\x00\x00{0}\x00\x00'.format(chr(int_num))
         else:  # Other kind of number
-            LOGGER.debug('Number: {0}'.format(str_num))
+            # LOGGER.debug('Number: {0}'.format(str_num))
             if str_num != '.':  # Only valid floats allowed
                 bin_num = convert_number(str_num)  # Expand int or float
                 bin_num = '{0}\x0e{1}'.format(str_num, bin_num)
@@ -455,6 +474,15 @@ def process_numbers(str_statement):
     str_result += str_post  # Recover remaining text of statement
 
     return str_result
+
+
+def inc_arr_numbers(str_sttmnt, n_pos, i, n_prev, arr_numbers):
+    """Increments Number array slicing the required data from str_sttmnt"""
+
+    str_number = str_sttmnt[n_pos:i]
+    str_prevc = str_sttmnt[n_pos - 1]
+    str_prevp = str_sttmnt[n_prev:n_pos]
+    arr_numbers.append([str_number, n_pos, str_prevc, str_prevp])
 
 
 def convert_number(strnum):
@@ -468,14 +496,14 @@ def convert_number(strnum):
     det_int = re.compile('[+-]?[0-9]+$')
     match_int = det_int.match(strnum)
     if match_int:
-        LOGGER.debug('int: {0}'.format(strnum))
+        # LOGGER.debug('int: {0}'.format(strnum))
         newint = int(strnum)
         c = convert_int(newint)
     else:
         # Float
         try:
             newfloat = float(strnum)
-            LOGGER.debug('float: {0}'.format(strnum))
+            # LOGGER.debug('float: {0}'.format(strnum))
             c = convert_float(newfloat)
         except ValueError:
             pass
@@ -677,127 +705,127 @@ class Plus3DosFileHeader(object):
 # ---------
 
 TOKENS = {
-    'PEEK\\$': 135,
-    'REG': 136,
-    'DPOKE': 137,
-    'DPEEK': 138,
-    'MOD': 139,
-    '<<': 140,
-    '>>': 141,
-    'UNTIL': 142,
-    'ERROR': 143,
-    'DEFPROC': 145,
-    'ENDPROC': 146,
-    'PROC': 147,
-    'LOCAL': 148,
-    'DRIVER': 149,
-    'WHILE': 150,
-    'REPEAT': 151,
-    'ELSE': 152,
-    'REMOUNT': 153,
-    'BANK': 154,
-    'TILE': 155,
-    'LAYER': 156,
-    'PALETTE': 157,
-    'SPRITE': 158,
-    'PWD': 159,
-    'CD': 160,
-    'MKDIR': 161,
-    'RMDIR': 162,
-    'SPECTRUM': 163,
-    'PLAY': 164,
-    'RND': 165,
-    'INKEY\\$': 166,
-    'PI': 167,
-    'POINT': 169,
-    'SCREEN\\$': 170,
-    'ATTR': 171,
-    'TAB': 173,
-    'VAL\\$': 174,
-    'CODE': 175,
-    'VAL': 176,
-    'LEN': 177,
-    'SIN': 178,
-    'COS': 179,
-    'TAN': 180,
-    'ASN': 181,
-    'ACS': 182,
-    'ATN': 183,
-    'LN': 184,
-    'EXP': 185,
-    'SQR': 187,
-    'SGN': 188,
-    'ABS': 189,
-    'PEEK': 190,
-    'USR': 192,
-    'STR\\$': 193,
-    'CHR\\$': 194,
-    'NOT': 195,
-    'BIN': 196,
-    '<=': 199,
-    '>=': 200,
-    '<>': 201,
-    'LINE': 202,
-    'THEN': 203,
-    'STEP': 205,
-    'DEF FN': 206,
-    'CAT': 207,
-    'FORMAT': 208,
-    'MOVE': 209,
-    'ERASE': 210,
-    'OPEN #': 211,
-    'CLOSE #': 212,
-    'MERGE': 213,
-    'VERIFY': 214,
-    'BEEP': 215,
-    'CIRCLE': 216,
-    'INK': 217,
-    'PAPER': 218,
-    'FLASH': 219,
-    'BRIGHT': 220,
-    'INVERSE': 221,
-    'OVER': 222,
-    'OUT': 223,
-    'LPRINT': 224,
-    'LLIST': 225,
-    'STOP': 226,
-    'READ': 227,
-    'DATA': 228,
-    'RESTORE': 229,
-    'NEW': 230,
-    'BORDER': 231,
-    'CONTINUE': 232,
-    'DIM': 233,
-    'REM': 234,
-    'FOR': 235,
-    'GO TO': 236,
-    'GO SUB': 237,
-    'INPUT': 238,
-    'LOAD': 239,
-    'LIST': 240,
-    'LET': 241,
-    'PAUSE': 242,
-    'NEXT': 243,
-    'POKE': 244,
-    'PRINT': 245,
-    'PLOT': 246,
-    'RUN': 247,
-    'SAVE': 248,
-    'RANDOMIZE': 249,
-    'IF': 250,
-    'CLS': 251,
-    'DRAW': 252,
-    'CLEAR': 253,
-    'RETURN': 254,
-    'COPY': 255,
-    'ON': 144,
-    'FN': 168,
-    'AT': 172,
-    'INT': 186,
-    'IN': 191,
-    'OR': 197,
-    'AND': 198,
-    'TO': 204
+    'PEEK\\$': [135, True],
+    'REG': [136, True],
+    'DPOKE': [137, True],
+    'DPEEK': [138, True],
+    'MOD': [139, True],
+    '<<': [140, True],
+    '>>': [141, True],
+    'UNTIL': [142, False],
+    'ERROR': [143, False],
+    'DEFPROC': [145, False],
+    'ENDPROC': [146, False],
+    'PROC': [147, False],
+    'LOCAL': [148, False],
+    'DRIVER': [149, False],
+    'WHILE': [150, False],
+    'REPEAT': [151, False],
+    'ELSE': [152, False],
+    'REMOUNT': [153, False],
+    'BANK': [154, True],
+    'TILE': [155, True],
+    'LAYER': [156, True],
+    'PALETTE': [157, False],
+    'SPRITE': [158, True],
+    'PWD': [159, False],
+    'CD': [160, False],
+    'MKDIR': [161, False],
+    'RMDIR': [162, False],
+    'SPECTRUM': [163, False],
+    'PLAY': [164, False],
+    'RND': [165, True],
+    'INKEY\\$': [166, False],
+    'PI': [167, False],
+    'POINT': [169, True],
+    'SCREEN\\$': [170, False],
+    'ATTR': [171, False],
+    'TAB': [173, True],
+    'VAL\\$': [174, False],
+    'CODE': [175, True],
+    'VAL': [176, False],
+    'LEN': [177, False],
+    'SIN': [178, True],
+    'COS': [179, True],
+    'TAN': [180, True],
+    'ASN': [181, True],
+    'ACS': [182, True],
+    'ATN': [183, True],
+    'LN': [184, True],
+    'EXP': [185, True],
+    'SQR': [187, True],
+    'SGN': [188, True],
+    'ABS': [189, True],
+    'PEEK': [190, True],
+    'USR': [192, True],
+    'STR\\$': [193, False],
+    'CHR\\$': [194, True],
+    'NOT': [195, False],
+    'BIN': [196, True],
+    '<=': [199, True],
+    '>=': [200, True],
+    '<>': [201, True],
+    'LINE': [202, True],
+    'THEN': [203, False],
+    'STEP': [205, True],
+    'DEF FN': [206, False],
+    'CAT': [207, False],
+    'FORMAT': [208, False],
+    'MOVE': [209, False],
+    'ERASE': [210, False],
+    'OPEN #': [211, True],
+    'CLOSE #': [212, True],
+    'MERGE': [213, False],
+    'VERIFY': [214, False],
+    'BEEP': [215, True],
+    'CIRCLE': [216, True],
+    'INK': [217, True],
+    'PAPER': [218, True],
+    'FLASH': [219, True],
+    'BRIGHT': [220, True],
+    'INVERSE': [221, True],
+    'OVER': [222, True],
+    'OUT': [223, True],
+    'LPRINT': [224, True],
+    'LLIST': [225, True],
+    'STOP': [226, False],
+    'READ': [227, False],
+    'DATA': [228, True],
+    'RESTORE': [229, True],
+    'NEW': [230, False],
+    'BORDER': [231, True],
+    'CONTINUE': [232, False],
+    'DIM': [233, True],
+    'REM': [234, False],
+    'FOR': [235, False],
+    'GO TO': [236, True],
+    'GO SUB': [237, True],
+    'INPUT': [238, False],
+    'LOAD': [239, False],
+    'LIST': [240, True],
+    'LET': [241, False],
+    'PAUSE': [242, True],
+    'NEXT': [243, False],
+    'POKE': [244, True],
+    'PRINT': [245, True],
+    'PLOT': [246, True],
+    'RUN': [247, True],
+    'SAVE': [248, False],
+    'RANDOMIZE': [249, True],
+    'IF': [250, True],
+    'CLS': [251, False],
+    'DRAW': [252, True],
+    'CLEAR': [253, True],
+    'RETURN': [254, False],
+    'COPY': [255, True],
+    'ON': [144, False],
+    'FN': [168, False],
+    'AT': [172, True],
+    'INT': [186, True],
+    'IN': [191, True],
+    'OR': [197, False],
+    'AND': [198, False],
+    'TO': [204, True]
 }
 
 CHARS = {
@@ -819,6 +847,11 @@ CHARS = {
     '\u2599': '\x8e',  # Quadrant upper left and lower left and lower right
     '\u2588': '\x8f'  # Full block
 }
+
+PRENUM = ' =(,+-*/<>#;'
+for str_tok in TOKENS:
+    if TOKENS[str_tok][1]:
+        PRENUM += chr(TOKENS[str_tok][0])
 
 if __name__ == '__main__':
     main()
