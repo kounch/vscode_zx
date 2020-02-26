@@ -415,8 +415,8 @@ def process_numbers(str_statement):
                         n_pos = i
             else:
                 testfloat = str_statement[n_pos:i + 1]
-                if (str_char not in 'e.') and not (str_char in '+-'
-                                                   and chr_prev == 'e'):
+                if (str_char not in 'eE.') and not (str_char in '+-'
+                                                   and chr_prev in 'eE'):
                     try:
                         testfloat = float(testfloat)
                     except ValueError:
