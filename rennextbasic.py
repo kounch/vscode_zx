@@ -84,8 +84,7 @@ def main():
         for line in code:
             test_line = line.strip()
             if test_line and test_line[
-                    0] != '#':  # Lines with only comments and directives aren't parsed
-
+                    0] != '#':  # Lines with just directives aren't parsed
                 # Split line number and content, then catalog
                 det_comm = re.compile('(\\s*\\d+)\\s*(.*)')
                 match_comm = det_comm.match(line)
@@ -131,7 +130,7 @@ def main():
                 test_line = line.strip()
                 if test_line:
                     if test_line[
-                            0] == '#':  # Lines with only comments and directives aren't parsed
+                            0] == '#':  # Lines with directives aren't parsed
                         l_text = line
                         if test_line.startswith('#autostart '):
                             # Split line number and content

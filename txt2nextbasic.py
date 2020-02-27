@@ -55,7 +55,7 @@ _ = gettext.gettext
 def main():
     """Main Routine"""
 
-    #Check Python version
+    # Check Python version
     arr_v = sys.version_info
     if arr_v[0] < 3 or (arr_v[0] == 3 and arr_v[1] < 6):
         str_msg = _('You need version 3.6 or later of Python')
@@ -255,7 +255,8 @@ def convert_char(line):
     if arr_line:
         n_line = arr_line[0]
         for p_line in arr_line[1:]:
-            str_i = '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'  # Integer between 0 and 255
+            # Integer between 0 and 255
+            str_i = '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'
             str_x = '(x[0-9a-fA-F]{1,2})'  # Hex between 0 and FF
             det_esc = re.compile('({0}|{1})(.*)'.format(str_i, str_x))
             match_esc = det_esc.findall(p_line)
@@ -416,7 +417,7 @@ def process_numbers(str_statement):
             else:
                 testfloat = str_statement[n_pos:i + 1]
                 if (str_char not in 'eE.') and not (str_char in '+-'
-                                                   and chr_prev in 'eE'):
+                                                    and chr_prev in 'eE'):
                     try:
                         testfloat = float(testfloat)
                     except ValueError:
@@ -428,8 +429,8 @@ def process_numbers(str_statement):
                             inc_arr_numbers(str_statement, n_pos, i, n_prev,
                                             arr_numbers)
                             n_prev = i
-                        except:
-                            pass  #Not a number
+                        except ValueError:
+                            pass  # Not a number
         i += 1
 
     if is_number:
@@ -461,7 +462,7 @@ def process_numbers(str_statement):
                 int_num = int(str_num, base=2)  # Binary text to int
                 bin_num = u'{0}\x0e'.format(
                     str_num)  # Sinclair BASIC number marker
-                # Looks like BIN nubers are saved using one byte surrounded by 0s
+                # BIN numbers are saved using one byte surrounded by 0s?
                 bin_num += u'\x00\x00{0}\x00\x00'.format(chr(int_num))
         else:  # Other kind of number
             # LOGGER.debug('Number: {0}'.format(str_num))
@@ -594,7 +595,7 @@ def convert_float(newfloat):
         mantissa = b_sign + mantissa[1:]
 
         # Format exponent
-        b = '{0:08b}'.format(128 + newexp)  #To string
+        b = '{0:08b}'.format(128 + newexp)  # To string
 
         b += mantissa  # Final bits
 
@@ -612,8 +613,8 @@ def convert_float(newfloat):
         return convert_int(0)
 
 
-#Classes
-#-------
+# Classes
+# -------
 class Plus3DosFile(object):
     """+3DOS File Object"""
     def __init__(self, filetype=0, content=None, load_addr=0x8000):
@@ -654,24 +655,28 @@ class Plus3DosFile(object):
 
 class Plus3DosFileHeader(object):
     """+3DOS File Header Object
-    
+
       504C5553 33444F53  Bytes 0...7  - +3DOS signature - 'PLUS3DOS'
       1A                 Byte 8       - 1Ah (26) Soft-EOF (end of file)
       01                 Byte 9       - Issue number
       00                 Byte 10      - Version number
-      C7000000           Bytes 11...14    - Length of the file in bytes, 32 bit number,
-                                            least significant byte in lowest address
+      C7000000           Bytes 11...14    - Length of the file in bytes,
+                                            32 bit number, least significant
+                                            byte in lowest address
       0047000A 00470000  Bytes 15...22    - +3 BASIC header data
-      Program  -  0  - file length - 8000h or LINE    offset to prog -  (not used)
+      Program  -  0  - file length - 8000h or LINE    offset to prog
+                                                      (not used)
                  00    4700          0A00             4700              00
       000000 (...) 0000  Bytes 23...126   - Reserved (set to 0)
       D7                 Byte 127 - Checksum (sum of bytes 0...126 modulo 256)
       (BASIC Program)
         Notes for a file named: "nnnnnnnnn.bin":
         504C5553 33444F53 1A0100           -> Bytes 0...10
-        187 + n bytes (file)               -> Bytes 11...14 least significant byte in lowest address
+        187 + n bytes (file)               -> Bytes 11...14 least significant
+                                                         byte in lowest address
         00                                 -> Byte  15
-        59  + n bytes (prog)               -> Bytes 16,17 least significant byte in lowest address
+        59  + n bytes (prog)               -> Bytes 16,17 least significant
+                                                         byte in lowest address
         0A00                               -> Bytes 18,19
         59  + n bytes (prog)               -> Bytes 20,21
         00..00                             -> Bytes 22..126
