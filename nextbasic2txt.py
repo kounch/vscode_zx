@@ -57,12 +57,7 @@ def main():
         LOGGER.error(str_msg)
         raise RuntimeError(str_msg)
 
-    # arg_data = parse_args()
-    arg_data = {}
-    arg_data['input'] = '/Users/kounch/Developer/ZX Spectrum Next/BASIC/'
-    arg_data['input'] += 'Projects/Personal/Dragon/Dragon1.bas'
-    arg_data[
-        'output'] = '/Users/kounch/Developer/ZX Spectrum Next/vscode_zx/test.txt'
+    arg_data = parse_args()
 
     if arg_data['input']:
         with open(arg_data['input'], 'rb') as f:
@@ -118,6 +113,7 @@ def parse_args():
     o_path = None
     if arguments.output_path:
         o_path = Path(arguments.output_path)
+    values['output'] = o_path
 
     if i_path:
         if not i_path.exists():
@@ -220,7 +216,7 @@ TOKENS = {
     141: '>>',
     142: 'UNTIL',
     143: 'ERROR',
-    144: 'ON',
+    144: ' ON',
     145: 'DEFPROC',
     146: 'ENDPROC',
     147: 'PROC',
@@ -267,21 +263,21 @@ TOKENS = {
     188: 'SGN',
     189: 'ABS',
     190: 'PEEK',
-    191: 'IN',
+    191: ' IN',
     192: 'USR',
     193: 'STR$',
     194: 'CHR$',
-    195: 'NOT',
+    195: ' NOT',
     196: 'BIN',
-    197: 'OR',
-    198: 'AND',
-    199: '<=',
-    200: '>=',
-    201: '<>',
+    197: ' OR',
+    198: ' AND',
+    199: ' <=',
+    200: ' >=',
+    201: ' <>',
     202: 'LINE',
-    203: 'THEN',
-    204: 'TO',
-    205: 'STEP',
+    203: ' THEN',
+    204: ' TO',
+    205: ' STEP',
     206: 'DEF FN',
     207: 'CAT',
     208: 'FORMAT',
