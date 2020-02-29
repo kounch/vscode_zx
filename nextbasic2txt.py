@@ -157,7 +157,7 @@ def procbin(b_data, i_len):
                 b_eol = True
                 break
 
-            if i_char == 0x0e:
+            if i_char == 0x0e and not n_counter:
                 n_counter = 6
 
             if n_counter:
