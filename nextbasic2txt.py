@@ -134,7 +134,8 @@ def procbin(b_data, i_len):
     while i_len > 4:
         line_number = int.from_bytes(b_data[:2], "big")
         if prev_line > line_number:
-            print(line_number)
+            LOGGER.debug('Overflow: Line {0} after {1}'.format(
+                prev_line, line_number))
             break
         prev_line = line_number
 
