@@ -132,7 +132,8 @@ def procbin(b_data, i_len):
     arr_str = []
     prev_line = 0
     while i_len > 4:
-        line_number = int.from_bytes(b_data[:2], "big")
+        line_number = int.from_bytes(b_data[:2], 'big')
+        l_length = int.from_bytes(b_data[2:4], 'little')
         if prev_line > line_number:
             LOGGER.debug('Overflow: Line {0} after {1}'.format(
                 prev_line, line_number))
@@ -145,20 +146,22 @@ def procbin(b_data, i_len):
         n_counter = 0
         tkn_expand = 1
         b_eol = False
+        b_rem = False
         str_line = u''
-        while not b_eol:
+        while l_length:
             b_char = b_data[:1]
             b_data = b_data[1:]
+            l_length = l_length - 1
             i_len = i_len - 1
 
             i_char = int.from_bytes(b_char, "big")
             s_char = chr(i_char)
             b_processed = False
-            if i_char == 0x0d and not n_counter:
+            if i_char == 0x0d and not l_length:
                 b_eol = True
                 break
 
-            if i_char == 0x0e and not n_counter:
+            if i_char == 0x0e and not n_counter and not b_rem:
                 n_counter = 6
 
             if n_counter:
@@ -168,6 +171,9 @@ def procbin(b_data, i_len):
             if s_char == '"':
                 tkn_expand = 1 - tkn_expand
 
+            if b_rem:
+                tkn_expand = 0
+
             if tkn_expand:
                 if i_char in TOKENS:
                     s_char = '{0} '.format(TOKENS[i_char])
@@ -176,6 +182,9 @@ def procbin(b_data, i_len):
                 if i_char in CHARS:
                     s_char = '{0} '.format(CHARS[i_char])
                     b_processed = True
+
+            if i_char == 0x0EA:
+                b_rem = True
 
             if not b_processed:
                 if i_char < 0x20 or i_char > 0x7e:
