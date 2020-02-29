@@ -215,6 +215,7 @@ def proc_basic(line):
             chk_sttmnt = str_sttmnt.strip()
             if chk_sttmnt and chk_sttmnt[0] == ':':
                 chk_sttmnt = chk_sttmnt[1:].strip()
+            # Don't process quoted text or dot commands
             if chk_sttmnt and chk_sttmnt[0] != '"' and chk_sttmnt[0] != '.':
                 str_sttmnt = process_tokens(str_sttmnt)
                 str_sttmnt = process_params(str_sttmnt)
@@ -346,9 +347,9 @@ def extract_statements(line):
 
 
 def process_tokens(str_statement):
-    """ Converts token strings to Sinclair ASCII"""
+    """ Converts token strings in statement to Sinclair ASCII"""
 
-    # Tokens with spaces processing
+    # Tokens with spaces are processed first
     for token in TOKENS:
         chr_token = chr(
             TOKENS[token][0])  # Dictionaries are ordereded since 3.6
@@ -359,13 +360,13 @@ def process_tokens(str_statement):
                 for str_token in find_t:
                     str_statement = str_statement.replace(str_token, chr_token)
 
-    # Processing of tokens without spaces
+    # Two kind of token "words", standard (e.g. INKEY$) and symbols (<=, etc.)
     str_letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ$'
     str_symbols = '<>='
-    str_result = ''
 
+    str_result = ''
     is_word = is_symbol = False
-    str_word = ''
+    str_word = ''  # Temporary storage of word (possibly a token)
     i = 0
     # Compose a list of all possible words in statement, split accordingly
     for str_char in str_statement:
@@ -406,7 +407,7 @@ def process_tokens(str_statement):
 
 def find_token(str_word):
     """Checks if a word is token or symbol, and replaces with Sinclair ASCII
-    character"""
+    character, if not, the original word is returned"""
 
     str_result = str_word
     for token in TOKENS:
