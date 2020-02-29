@@ -72,6 +72,7 @@ def main():
     else:
         str_msg = _('Not a valid file')
         LOGGER.error(str_msg)
+        raise RuntimeError(str_msg)
 
     if arr_str:
         with open(arg_data['output'], 'w') as f:
@@ -129,10 +130,14 @@ def parse_args():
 
 def procbin(b_data, i_len):
     arr_str = []
+    prev_line = 0
     while i_len > 4:
         line_number = int.from_bytes(b_data[:2], "big")
-        if line_number > 9999:
+        if prev_line > line_number:
+            print(line_number)
             break
+        prev_line = line_number
+
         b_data = b_data[4:]
         i_len = i_len - 4
 
@@ -178,7 +183,9 @@ def procbin(b_data, i_len):
             str_line += s_char
 
         str_line += '\r\n'
+
         arr_str.append('{0:>4} {1}'.format(line_number, str_line))
+        LOGGER.debug('{0}-> {1}'.format(line_number, str_line))
 
     return arr_str
 
