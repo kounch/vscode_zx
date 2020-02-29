@@ -212,7 +212,11 @@ def proc_basic(line):
     line_bin = ''
     for str_sttmnt in arr_statements:
         if str_sttmnt:
-            if str_sttmnt[0] != '"' and str_sttmnt.strip()[0] != '.':
+            chk_sttmnt = str_sttmnt.strip()
+            if chk_sttmnt and chk_sttmnt[0] == ':':
+                chk_sttmnt = chk_sttmnt[1:].strip()
+            # Don't process quoted text or dot commands
+            if chk_sttmnt and chk_sttmnt[0] != '"' and chk_sttmnt[0] != '.':
                 str_sttmnt = process_tokens(str_sttmnt)
                 str_sttmnt = process_params(str_sttmnt)
                 str_sttmnt = process_numbers(str_sttmnt)
@@ -343,18 +347,79 @@ def extract_statements(line):
 
 
 def process_tokens(str_statement):
-    """ Converts token strings to Sinclair ASCII"""
+    """ Converts token strings in statement to Sinclair ASCII"""
 
+    # Tokens with spaces are processed first
     for token in TOKENS:
         chr_token = chr(
             TOKENS[token][0])  # Dictionaries are ordereded since 3.6
-        det_t = re.compile('(\\s*{0}\\s*)'.format(token))
-        find_t = det_t.findall(str_statement)
-        if find_t:
-            for str_token in find_t:
-                str_statement = str_statement.replace(str_token, chr_token)
+        if ' ' in token:
+            det_t = re.compile('(\\s*{0}\\s*)'.format(token))
+            find_t = det_t.findall(str_statement)
+            if find_t:
+                for str_token in find_t:
+                    str_statement = str_statement.replace(str_token, chr_token)
 
-    return str_statement
+    # Two kind of token "words", standard (e.g. INKEY$) and symbols (<=, etc.)
+    str_letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ$'
+    str_symbols = '<>='
+
+    str_result = ''
+    is_word = is_symbol = False
+    str_word = ''  # Temporary storage of word (possibly a token)
+    i = 0
+    # Compose a list of all possible words in statement, split accordingly
+    for str_char in str_statement:
+        if str_char in str_letters:  # Word
+            if is_symbol:
+                is_symbol = False
+                str_result += find_token(str_word)
+            if not is_word:
+                is_word = True
+                str_word = str_char
+            else:
+                str_word += str_char
+
+        elif str_char in str_symbols:  # Symbol
+            if is_word:
+                is_word = False
+                str_result += find_token(str_word)
+            if not is_symbol:
+                is_symbol = True
+                str_word = str_char
+            else:
+                str_word += str_char
+
+        else:  # Not a Word
+            if is_word or is_symbol:
+                is_word = is_symbol = False
+                str_result += find_token(str_word)
+
+            if str_char != ' ':
+                str_result += str_char
+
+    # Last remaining word
+    if is_word or is_symbol:
+        str_result += find_token(str_word)
+
+    return str_result
+
+
+def find_token(str_word):
+    """Checks if a word is token or symbol, and replaces with Sinclair ASCII
+    character, if not, the original word is returned"""
+
+    str_result = str_word
+    for token in TOKENS:
+        str_token = token.replace('\\', '')
+        # Dictionaries are ordered since Python 3.6
+        chr_token = chr(TOKENS[token][0])
+        if str_word == str_token:
+            str_result = chr_token
+            b_token = True
+            break
+
+    return str_result
 
 
 def process_params(str_statement):
