@@ -211,7 +211,7 @@ def proc_basic(line):
        Data is returned as bytes.
     """
 
-    line_number, line = extract_linenumber(line)  # Line number as int
+    i_line, line = extract_linenumber(line)  # Line number as int
     line = convert_char(line)  # Replace all known UTF-9 characters
     line, comment = extract_comment(line)  # REM comments won't be parsed
     arr_statements = extract_statements(line)  # Split quoted strings and ':'
@@ -232,12 +232,12 @@ def proc_basic(line):
     line_bin = [ord(c) for c in line_bin]
     line_bin = bytes(line_bin)
 
-    line_number = line_number.to_bytes(2, byteorder='big')
+    line_number = i_line.to_bytes(2, byteorder='big')
     line_len = len(line_bin)
     line_len = line_len.to_bytes(2, byteorder='little')
     line_bin = b''.join([line_number, line_len, line_bin])
 
-    return line_number, line_bin
+    return i_line, line_bin
 
 
 def extract_linenumber(line):
