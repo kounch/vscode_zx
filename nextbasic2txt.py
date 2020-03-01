@@ -150,45 +150,54 @@ def procbin(b_data, i_len):
         str_line = u''
         while l_length:
             b_char = b_data[:1]
+            i_char = int.from_bytes(b_char, "big")
+            s_char = chr(i_char)
+
             b_data = b_data[1:]
             l_length = l_length - 1
             i_len = i_len - 1
 
-            i_char = int.from_bytes(b_char, "big")
-            s_char = chr(i_char)
-            b_processed = False
+            # EOL char only valid at the real End Of Line
             if i_char == 0x0d and not l_length:
                 b_eol = True
                 break
 
+            # Skip number 5-bytes data
             if i_char == 0x0e and not n_counter and not b_rem:
                 n_counter = 6
-
             if n_counter:
                 n_counter -= 1
                 continue
 
+            # Quoted data
             if s_char == '"':
                 tkn_expand = 1 - tkn_expand
 
+            # Comments
             if b_rem:
                 tkn_expand = 0
 
             if tkn_expand:
+                # Token expansion
                 if i_char in TOKENS:
                     s_char = '{0} '.format(TOKENS[i_char])
-                    b_processed = True
             else:
-                if i_char in CHARS:
-                    s_char = '{0} '.format(CHARS[i_char])
-                    b_processed = True
+                # Char conversion
+                if s_char in CHARS:
+                    s_char = '{0}'.format(CHARS[s_char])
+                else:
+                    # Escape non printable character
+                    if i_char < 0x20 or i_char > 0x7e:
+                        s_char = '`x{:02x}'.format(i_char)
 
+            # Detect REM
             if i_char == 0x0EA:
                 b_rem = True
 
-            if not b_processed:
-                if i_char < 0x20 or i_char > 0x7e:
-                    s_char = '`x{:02x}'.format(i_char)
+            # Detect ; comments
+            if s_char == ';' and tkn_expand:
+                if not str_line.strip() or str_line.strip()[-1] == ':':
+                    b_rem = True
 
             str_line += s_char
 
@@ -348,23 +357,24 @@ TOKENS = {
 }
 
 CHARS = {
-    '£': '`',
-    '©': '\x7f',
-    '\u259D': '\x81',  # Quadrant upper right
-    '\u2598': '\x82',  # Quadrant upper left
-    '\u2580': '\x83',  # Upper half block
-    '\u2597': '\x84',  # Quadrant lower right
-    '\u2590': '\x85',  # Right half block
-    '\u259A': '\x86',  # Quadrant upper left and lower right
-    '\u259C': '\x87',  # Quadrant upper left and upper right and lower right
-    '\u2596': '\x88',  # Quadrant lower left
-    '\u259E': '\x89',  # Quadrant upper right and lower left
-    '\u258C': '\x8a',  # Left half block
-    '\u259B': '\x8b',  # Quadrant upper left and upper right and lower left
-    '\u2584': '\x8c',  # Lower half block
-    '\u259F': '\x8d',  # Quadrant upper right and lower left and lower right
-    '\u2599': '\x8e',  # Quadrant upper left and lower left and lower right
-    '\u2588': '\x8f'  # Full block
+    '`': '£',
+    '\x7f': '©',
+    '\x81': '\u259D',  # Quadrant upper right
+    '\x81': '\u259D',  # Quadrant upper right
+    '\x82': '\u2598',  # Quadrant upper left
+    '\x83': '\u2580',  # Upper half block
+    '\x84': '\u2597',  # Quadrant lower right
+    '\x85': '\u2590',  # Right half block
+    '\x86': '\u259A',  # Quadrant upper left and lower right
+    '\x87': '\u259C',  # Quadrant upper left and upper right and lower right
+    '\x88': '\u2596',  # Quadrant lower left
+    '\x89': '\u259E',  # Quadrant upper right and lower left
+    '\x8a': '\u258C',  # Left half block
+    '\x8b': '\u259B',  # Quadrant upper left and upper right and lower left
+    '\x8c': '\u2584',  # Lower half block
+    '\x8d': '\u259F',  # Quadrant upper right and lower left and lower right
+    '\x8e': '\u2599',  # Quadrant upper left and lower left and lower right
+    '\x8f': '\u2588',  # Full block
 }
 
 if __name__ == '__main__':
