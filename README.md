@@ -20,6 +20,8 @@ Works best if used with [ZX Spectrum BASIC syntax highlighting for Visual Studio
 
 ## English
 
+A ZIP file with the latest version is available following [this link](https://github.com/kounch/vscode_zx/releases/latest)
+
 ### Software Requirements
 
 - **Visual Studio Code**. Docs, downloads, etc. [here](https://code.visualstudio.com/)
@@ -229,6 +231,8 @@ Se recomienda usar junto con el plugin [ZX Spectrum BASIC syntax highlighting fo
 ---
 
 ## Castellano
+
+Se puede descargar un archivo ZIP con la última versión siguiendo [este enlace](https://github.com/kounch/vscode_zx/releases/latest)
 
 ### Software necesario
 
