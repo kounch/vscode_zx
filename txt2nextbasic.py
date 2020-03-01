@@ -79,6 +79,7 @@ def main():
             code += ['20 LOAD "{0}" CODE {1}'.format(arg_data['name'], s_addr)]
             code += ['30 RANDOMIZE USR {0}'.format(s_addr)]
 
+        prev_line = -1
         basic_data = []
         for line in code:
             line = line.strip()
@@ -86,7 +87,13 @@ def main():
             if line:
                 # Comments and directives aren't parsed
                 if line[0] != '#':
-                    arr_line = proc_basic(line)
+                    i_line, arr_line = proc_basic(line)
+                    if i_line <= prev_line:
+                        str_msg = _('Wrong Line Number: {0}')
+                        LOGGER.error(str_msg.format(i_line))
+                        raise RuntimeError(str_msg.format(i_line))
+                    else:
+                        prev_line = i_line
                     if arr_line:
                         basic_data.append(arr_line)  # Parse BASIC
                 elif line.startswith('#program'):
@@ -230,7 +237,7 @@ def proc_basic(line):
     line_len = line_len.to_bytes(2, byteorder='little')
     line_bin = b''.join([line_number, line_len, line_bin])
 
-    return line_bin
+    return line_number, line_bin
 
 
 def extract_linenumber(line):

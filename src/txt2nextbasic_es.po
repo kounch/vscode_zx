@@ -20,6 +20,9 @@ msgstr ""
 msgid "You need version 3.6 or later of Python"
 msgstr "Se necesita al menos la versión 3.6 de Python"
 
+msgid "Wrong Line Number: {0}"
+msgstr "Número de línea erróneo: {0}"
+
 msgid "Cannot parse line: {0}"
 msgstr "No se pudo procesar la línea: {0}"
 
