@@ -32,5 +32,14 @@ msgstr "Renumbering $filename.bas..."
 msgid "Error while renumbering"
 msgstr "Renumbering Error!!!"
 
+msgid "Formatting $filename"
+msgstr "Formatting $filename.bas..."
+
+msgid "Error while analyzing"
+msgstr "Format Error!!!"
+
+msgid "Error while formatting"
+msgstr "Processing Error!!!"
+
 msgid "Finished"
 msgstr "Done"

@@ -84,7 +84,7 @@ if [[ $action == "format" ]]; then
     "$python3bin" "$mypath/nextbasic2txt.py" -i "$filedir/$filename.tmp.bas" -o "$fullfile"
     retval=$?
     if [ $retval != 0 ]; then
-        echo $(gettext "Error while Analyzing")
+        echo $(gettext "Error while Formatting")
         exit $retVal
     fi
     rm "$filedir/$filename.tmp.bas" 
