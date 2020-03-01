@@ -15,15 +15,15 @@
  130 SPRITE BORDER 0:SPRITE PRINT 1:LAYER 2,1
  135 REM FOR i=0 TO 28:LET x=7*i:LET y=50+i:SPRITE 0,x,y,s,1:NEXT i
  140 REM FOR i=28 TO 0 STEP -1:LET x=i*7:LET y=50+i:SPRITE 0,x,y,s,1:NEXT i
- 145 LET n=40:FOR i=n TO 1 STEP -1:LET Phi=PI/2*(4*i/n+1)
- 150 LET x=100+50*(1+COS(Phi)):LET y=60+30*(1-SIN(Phi)):SPRITE 0,x,y,s,1:NEXT i
+ 145 LET n=40:FOR %i=1 TO n:LET j=%i:LET Phi=PI/2*(4*(n-j)/n+1)
+ 150 LET x=100+50*(1+COS(Phi)):LET y=60+30*(1-SIN(Phi)):SPRITE 0,x,y,s,1:NEXT %i
  160 GO TO 135
  199
  300 DEFPROC CreateRelSprites(i)
- 310 FOR j=i TO i+19
+ 310 FOR %j=i TO i+19
  320 READ p:REM Read Pattern
- 330 LET %k=j:LET m=%k MOD 7:PROC RelSprite(j,m*16,INT(j/7)*16,p)
- 340 NEXT j
+ 330 LET k=%j:LET m=%j MOD 7:PROC RelSprite(k,m*16,INT(k/7)*16,p)
+ 340 NEXT %j
  350 ENDPROC
  399 
  400 DEFPROC RelSprite(i,x,y,p)
