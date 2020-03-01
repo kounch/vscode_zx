@@ -45,7 +45,25 @@
               "command": "${workspaceFolder}\\..\\zxn_renumber.bat"
             },
             "args": [
-                "${file}"
+                "${file}",
+                "renumber"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Format NextBASIC",
+            "type": "shell",
+            "command": "${workspaceFolder}/../zxn_renumber.sh",
+            "windows": {
+              "command": "${workspaceFolder}\\..\\zxn_renumber.bat"
+            },
+            "args": [
+                "${file}",
+                "format"
             ],
             "group": {
                 "kind": "build",

@@ -22,6 +22,7 @@ SET FULLFILE=%~f1
 SET FILENAME=%~n1
 SET EXTENSION=%~x1
 SET FILEDIR=%~dp1
+SET ACTION=%2
 
 IF /I NOT "%EXTENSION%"==".bas" (
     ECHO ERROR^^!^^! Not a .bas file^^!^^!^^!
@@ -40,13 +41,36 @@ IF NOT %RETVAL% EQU 0 (
     exit /b %RETVAL%
 )
 
-ECHO Renumbering %FILENAME%.bas...
-py -3 "%MYPATH%\rennextbasic.py" -i "%FULLFILE%"
-	SET RETVAL=%ERRORLEVEL%
-	IF NOT %RETVAL% EQU 0 (
-		ECHO Error^^!^^!^^!
-		exit /b %RETVAL%
-	)
+IF [%ACTION%] == [] (
+    SET ACTION=renumber
+)
+
+IF /I "%ACTION%"=="renumber" (
+    ECHO Renumbering %FILENAME%.bas...
+    py -3 "%MYPATH%\rennextbasic.py" -i "%FULLFILE%"
+    SET RETVAL=%ERRORLEVEL%
+    IF NOT %RETVAL% EQU 0 (
+        ECHO Error^^!^^!^^!
+        exit /b %RETVAL%
+    )
+)
+
+IF /I "%ACTION%"=="format" (
+    ECHO Formatting %FILENAME%.bas...
+    COPY "%FULLFILE%" "%FILEDIR%\%FILENAME%.bas.bak"
+    py -3 "%MYPATH%\txt2nextbasic.py" -i "%FULLFILE%" -o "%FILEDIR%\%FILENAME%.tmp.bas"
+    SET RETVAL=%ERRORLEVEL%
+    IF NOT %RETVAL% EQU 0 (
+        ECHO Error^^!^^!^^!
+        exit /b %RETVAL%
+    )
+    py -3 "%MYPATH%\nextbasic2txt.py" -i "%FILEDIR%\%FILENAME%.tmp.bas" -o "%FULLFILE%"
+    SET RETVAL=%ERRORLEVEL%
+    IF NOT %RETVAL% EQU 0 (
+        ECHO Error^^!^^!^^!
+        exit /b %RETVAL%
+    )
+    DEL "%FILEDIR%\%FILENAME%.tmp.bas"
 )
 
 :End

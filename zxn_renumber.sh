@@ -18,6 +18,7 @@
 
 mypath=`dirname "$0"`
 fullfile=$1
+action=$2
 filename=$(basename "$fullfile")
 extension="${filename##*.}"
 filename="${filename%.*}"
@@ -54,13 +55,41 @@ if [ $retval != 0 ]; then
     exit $retVal
 fi
 
-echo $(eval_gettext "Renumbering \$filename")
-"$python3bin" "$mypath/rennextbasic.py" -i "$fullfile"
-retval=$?
-if [ $retval != 0 ]; then
-    echo $(gettext "Error while renumbering")
-    exit $retVal
+if [ -z $action ]; then
+    action="renumber"
 fi
+
+shopt -s nocasematch
+if [[ $action == "renumber" ]]; then
+    echo $(eval_gettext "Renumbering \$filename")
+    "$python3bin" "$mypath/rennextbasic.py" -i "$fullfile"
+    retval=$?
+    if [ $retval != 0 ]; then
+        echo $(gettext "Error while renumbering")
+        exit $retVal
+    fi
+fi
+shopt -u nocasematch
+
+shopt -s nocasematch
+if [[ $action == "format" ]]; then
+    echo $(eval_gettext "Formatting \$filename")
+    cp "$fullfile" "$filedir/$filename.bas.bak"
+    "$python3bin" "$mypath/txt2nextbasic.py" -i "$fullfile" -o "$filedir/$filename.tmp.bas"
+    retval=$?
+    if [ $retval != 0 ]; then
+        echo $(gettext "Error while Analyzing")
+        exit $retVal
+    fi
+    "$python3bin" "$mypath/nextbasic2txt.py" -i "$filedir/$filename.tmp.bas" -o "$fullfile"
+    retval=$?
+    if [ $retval != 0 ]; then
+        echo $(gettext "Error while Analyzing")
+        exit $retVal
+    fi
+    rm "$filedir/$filename.tmp.bas" 
+fi
+shopt -u nocasematch
 
 echo $(gettext "Finished")
 exit 0
