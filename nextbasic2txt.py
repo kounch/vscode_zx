@@ -130,13 +130,12 @@ def parse_args():
 
 def procbin(b_data, i_len):
     arr_str = []
-    prev_line = 0
+    prev_line = -1
     while i_len > 4:
         line_number = int.from_bytes(b_data[:2], 'big')
         l_length = int.from_bytes(b_data[2:4], 'little')
-        if prev_line > line_number:
-            LOGGER.debug('Overflow: Line {0} after {1}'.format(
-                prev_line, line_number))
+        if line_number < prev_line or line_number > 9999:
+            LOGGER.debug('End of program: Line {0}'.format(line_number))
             break
         prev_line = line_number
 
