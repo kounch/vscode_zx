@@ -1,0 +1,237 @@
+= vscode_zx
+
+Visual Studio Code Tasks and Scripts for NextBASIC and ZX Basic
+
+Features:
+
+- NextBASIC text to `.bas` file converter
+- NextBASIC text renumbering
+- Converts [unicode block elements](https://en.wikipedia.org/wiki/Block_Elements) to Sinclair block graphics
+- Supports non-printable characters using ` as escape character
+- Task support to compile with ZX Basic
+- Task integration to build (or convert) and run in ZEsarUX and CSpect emulators
+- Works with Windows, MacOS and (possibly) Linux
+
+Works best if used with [ZX Spectrum BASIC syntax highlighting for Visual Studio Code](https://github.com/jsanjose/zxbasic-vscode).
+
+<<<
+
+== Requirements
+
+=== Download
+
+A ZIP file with the latest version is available following [this link](https://github.com/kounch/vscode_zx/releases/latest)
+
+=== Software Requirements
+
+- **Visual Studio Code**. Docs, downloads, etc. [here](https://code.visualstudio.com/)
+
+- **Python (version 3.6 or later)**. Docs, downloads, etc. [here](https://www.python.org/)
+
+- **ZX Basic**. Version 1.8.10 or later (.zip or .tar.gz). Docs, download, etcs. [here](https://zxbasic.readthedocs.io)
+
+- **NextLibs for ZX Basic**. More info [here](http://zxbasic.uk/nextbuild/the-nextlibs/). Download [here](http://zxbasic.uk/nextbuild/download/)
+
+=== Optional Software
+
+- **hdfmonkey**. Download, [here](http://files.zxdemo.org/gasman/speccy/hdfmonkey/). Source Code [here](https://github.com/gasman/hdfmonkey). Binary for Windows [here](http://uto.speccy.org/)
+
+- **CSpect**. The latest development version can be found [here](https://dailly.blogspot.com/)
+
+- **ZEsarUX**. Docs, downloads, etc. [here](https://github.com/chernandezba/zesarux)
+
+<<<
+
+== Installation
+
+=== Basic Install
+
+Install Python 3. On Windows, make sure that `py launcher` is selected as install option.
+
+Create a directory structure like this:
+
+    vscode_zx/
+       |
+       +--zxbasic/
+       |
+       +--Projects/
+       |     |
+       |     +--.vscode/
+       |           |
+       |           +--tasks.json
+       |
+       +--rennextbasic.py
+       +--txt2nextbasic.py
+       +--zxn_renumber.sh (zxn_renumber.bat on Windows)
+       +--zxb_build.sh  (zxb_build.bat on Windows)
+
+`Projects` directory can be renamed, but it *must* be next to  `txt2nextbasic.py`, `rennextbasic.py`, `zxb_build...` and `zxn_renumber...`.
+
+Extract to `zxbasic` the full ZX Basic distribution, and then copy the file `nextlib.bas` (from `NextBuild-current.zip`: `NextBuildv5/ZXBC/library/`) to `zxbasic/library/`.
+
+<<<
+
+=== Installation with emulators
+
+If you also want the option to compile and launch with the emulators, expand the directory structure like this:
+
+    vscode_zx/
+       |
+       +--CSpect/
+       +--ZEsarUX/
+       +--zesaruxrc (zesaruxwinrc for Windows)
+       +--zxbasic/
+       |
+       +--Projects/
+       |     |
+       |     +--.vscode/
+       |           |
+       |           +--tasks.json
+       |
+       +--rennextbasic.py
+       +--txt2nextbasic.py
+       +--zxn_renumber.sh (zxn_renumber.bat for Windows)
+       +--zxb_build.sh  (zxb_build.bat for Windows)
+       |
+       +--hdfmonkey  (hdfmonkey.exe for Windows)
+
+...and extract in `CSpect/` and `ZEsarUX/` both emulators (on MacOS, copy ZEsarUX app next to `zxb_build.sh`).
+
+Now we have to set up the virtual SD card for each emulator.
+
+<<<
+
+==== CSpect configuration
+
+After obtaining an SD image file, rename it as `systemnext.img`, and copy to `CSpect/` directory, with the files `enNextZX.rom` and `enNxtmmc.rom`. (Read [here](https://www.specnext.com/latestdistro/) and [here](http://www.zxspectrumnext.online/cspect/) to download).
+
+Create the SD directory where the compiled software will be put:
+
+    cd /(...)/vscode_zx/
+    hdfmonkey mkdir ./CSpect/systemnext.img /devel
+
+Optionally, using `hdfmonkey`, we can replace the original distro `autoexec.bat` for the one availble in `ToInstall/autoexec.bas`. For example:
+
+    hdfmonkey put ./CSpect/systemnext.img ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
+
+<<<
+
+==== ZEsarUX Configuration
+
+Edit the file `zesaruxrc` (`zesaruxwinrc` for Windows), writing after `--mmc-file` the full path to the file `tbblue.mmc`.
+
+You can use the file that comes with the emulator distribution. If you prefer using another one, change its name to `tbblue.mmc`, and copy to `ZEsarUX/` directory.
+
+The, create the structure in the virtual SD where the compiled software will be copied:
+
+    cd /(...)/vscode_zx/
+    hdfmonkey mkdir ./ZEsarUX/tbblue.mmc /devel
+
+If you are using MacOS:
+
+    cd /(...)/vscode_zx/
+    hdfmonkey mkdir ./ZEsarUX.app/Contents/Resources/tbblue.mmc /devel
+
+Optionally, using `hdfmonkey`, we can replace the original distro `autoexec.bat` for the one availble in `ToInstall/autoexec.bas`. For example:
+
+    hdfmonkey put ./ZEsarUX/tbblue.mmc ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
+
+On MacOS:
+
+    hdfmonkey put ./ZEsarUX.app/Contents/Resources/tbblue.mmc ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
+
+<<<
+
+== How to use
+
+=== BAS Files
+
+The tasks and scripts are designed to deal with text files, with `.bas` extension, and encoded using UTF-8, with windows line endings (CRLF).
+
+NextBASIC keywords must be written always in uppercase (this offers compatibility with programs that use variable names similar to keywords).
+
+You can use [unicode block elements](https://en.wikipedia.org/wiki/Block_Elements) which will be automatically converted. Also , it is possible to have non-printable characters, using `` ` `` as escape code, and then the desired code, as a decimal or hexadecimal number (in this case preceded by "`x`"). For example, use `` `16`2`17`6`` or `` `x10`x02`x11`x06`` to send red ink and yellow paper codes. This method can be used too to embed little machine code routines inside of REM lines.
+
+A list of Sinclair codes is available [at this link](https://www.worldofspectrum.org/ZXBasicManual/zxmanappa.html). For ZX Spectrum Next codes see appendix A, in the official manual.
+
+=== Renumbering
+
+Open the directory "Projects" with Visual Studio Code.
+
+The `tasks.json` file creates a Visual Studio Code task named `Renumber NextBASIC`. When invoked with a `.bas` text file selected, tries to renumber the source code content.
+
+<<<
+
+=== Compiling
+
+Open the directory "Projects" with Visual Studio Code.
+
+The `tasks.json` file creates a couple of Visual Studio Code tasks named `Build ZX Basic` and `Build NextBASIC` that, when invoked with a `.bas` text file selected, creates a `build` directory and, inside of this, a `.bin` file with the compiled program if ZX Basic was selected, or a `.bas` file if NextBASIC. Also, in the case of ZX Basic, a launcher  `.bas` file is created, so it can be launched from the ZX Next Browser, ESXDOS o +3e DOS.
+
+For example, starting with this ZX Basic source file:
+
+       +--Projects/
+             |
+             +--.vscode/
+             |     |
+             |     +--tasks.json
+             |
+             +--Example.bas
+
+After running `Build ZX Basic` we will get:
+
+       +--Projects/
+             |
+             +--.vscode/
+             |     |
+             |     +--tasks.json
+             |
+             +--Example.bas
+             |
+             +--build/
+                  |
+                  +-Example.bas
+                  +-Example.bin
+
+`.bas` files do not neede to be created in the root of `Projects`, there can be as many subdirectories as you want.
+
+<<<
+
+=== Compiling and executing with emulator
+
+For each of the compiling options, there are also two other tasks named `Build ... And Run (CSpect)` and `Build ... And Run (ZEsarUX)` which can be used to compile, copy the new created files (`.bas` and, possibly, `.bin`) inside the virtual SD for the selected emulator, and then launch the emulator. If the `autoexec.bas` file has also been changed, a small BASIC program will start, where, pressing any key but BREAK will try to start the new program. If you press BREAK, ZX Next browser will be launched instead.
+
+Also, if a file `.filelist` is added, with the same name that the `.bas` file, and with the names of other files inside, the corresponding task will try to copy these files to the SD.
+
+For example, with a ZX Basic file and a `.filelist` file:
+
+       +--Projects/
+             |
+             +--.vscode/
+             |     |
+             |     +--tasks.json
+             |
+             +--Example.bas
+             +--Example.filelist
+             +--Image1.scr
+             +--Image2.scr
+             +--Screen.bmp
+             +--Screen2.bmp
+
+Where `Example.filelist` has these contents:
+
+        Image1.scr
+        Image2.scr
+        Screen.bmp
+
+When the task is run, `Example.bas` and `Example.bin` will be copied, and also `Image1.scr`, `Image2.scr` and `Screen.bmp`. But `Screen2.bmp` *won't*.
+
+<<<
+
+== Copyright
+
+Copyright (c) 2020 kounch
+
+Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE

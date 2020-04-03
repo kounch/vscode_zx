@@ -1,0 +1,241 @@
+= vscode_zx
+
+Tareas y scripts de Visual Studio Code para el desarrollo en NextBASIC y ZX Basic
+
+Características:
+
+- Conversor de texto a ficheros `.bas` de NextBASIC
+- Función para volver a numerar un listado de NextBASIC
+- Conversión de [caracteres unicode de bloques](https://en.wikipedia.org/wiki/Block_Elements) a gráficos de bloques de Sinclair
+- Soporte de caracteres no imprimibles usando ` como código de escape
+- Tareas para compilar con ZX Basic
+- Integración de tareas para compilar (o convertir) y ejecutar en los emuladores ZEsarUX y CSpect
+- Funciona en Windows, MacOS y (teóricamente) Linux
+
+Se recomienda usar junto con el plugin [ZX Spectrum BASIC syntax highlighting for Visual Studio Code](https://github.com/jsanjose/zxbasic-vscode).
+
+<<<
+
+== Requisitos
+
+=== Descarga
+
+Se puede descargar un archivo ZIP con la última versión siguiendo [este enlace](https://github.com/kounch/vscode_zx/releases/latest)
+
+=== Software necesario
+
+- **Visual Studio Code**. Documentación, descarga, etc. [aquí](https://code.visualstudio.com/)
+
+- **Python (versión 3.6 o superior)**. Documentación, descarga, etc. [aquí](https://www.python.org/)
+
+- **ZX Basic**. Documentación, descarga, etc. [aquí](https://zxbasic.readthedocs.io). Se necesita, al menos, la versión 1.8.10 (en formato .zip o .tar.gz)
+
+- **NextLibs para ZX Basic**. Leer más [aquí](http://zxbasic.uk/nextbuild/the-nextlibs/). Descargar [aquí](http://zxbasic.uk/nextbuild/download/)
+
+=== Software opcional
+
+- **hdfmonkey**. Descarga, [aquí](http://files.zxdemo.org/gasman/speccy/hdfmonkey/). Código fuente [aquí](https://github.com/gasman/hdfmonkey). Versión compilada para Windows [aquí](http://uto.speccy.org/)
+
+- **CSpect**. La última versión en desarrollo se puede obtener [aquí](https://dailly.blogspot.com/)
+
+- **ZEsarUX**. Documentación, descarga, etc. [aquí](https://github.com/chernandezba/zesarux)
+
+<<<
+
+== Instalación
+
+=== Instalación Básica
+
+Instalar Python 3 para el sistema operativo correspondiente. En el caso de Windows, asegurarse de que se incluye `py launcher` en las opciones de instalación.
+
+Crear una estructura de directorios similar a la siguiente:
+
+    vscode_zx/
+       |
+       +--zxbasic/
+       |
+       +--Projects/
+       |     |
+       |     +--.vscode/
+       |           |
+       |           +--tasks.json
+       |
+       +--locale/
+       |
+       +--rennextbasic.py
+       +--txt2nextbasic.py
+       +--zxn_renumber.sh (zxn_renumber.bat si es Windows)
+       +--zxb_build.sh  (zxb_build.bat en el caso de Windows)
+
+El directorio `Projects` se puede renombrar, pero *ha de estar* al lado de `txt2nextbasic.py` y `zxb_build...`.
+
+Descomprimir en `zxbasic` la distribución completa de ZX Basic, y luego copiar el archivo `nextlib.bas` (de `NextBuild-current.zip`: `NextBuildv5/ZXBC/library/`) en `zxbasic/library/`.
+
+<<<
+
+=== Instalación con emuladores
+
+Si se desea tener también la opción de compilar y lanzar en los emuladores, ampliar la estructura así:
+
+    vscode_zx/
+       |
+       +--CSpect/
+       +--ZEsarUX/
+       +--zesaruxrc (zesaruxwinrc en el caso de Windows)
+       +--zxbasic/
+       |
+       +--Projects/
+       |     |
+       |     +--.vscode/
+       |           |
+       |           +--tasks.json
+       |
+       +--locale/
+       |
+       +--rennextbasic.py
+       +--txt2nextbasic.py
+       +--zxn_renumber.sh (zxn_renumber.bat en Windows)
+       +--zxb_build.sh  (zxb_build.bat para Windows)
+       |
+       +--hdfmonkey  (hdfmonkey.exe en el caso de Windows)
+
+...y descomprimir en `CSpect/` y `ZEsarUX/` los dos emuladores (en el caso de MacOS, copiar directamente la app de ZEsarUX al lado de `zxb_build.sh`).
+
+Ahora, para cada emulador, se ha de configurar la SD para la emulación.
+
+<<<
+
+==== Configuración de CSpect
+
+Tras obtener un archivo de imagen de SD, renombrarlo como `systemnext.img`, y copiarlo en el directorio `CSpect/`, junto con los ficheros `enNextZX.rom` y `enNxtmmc.rom`. (Ver [aquí](https://www.specnext.com/latestdistro/) para más información y [aquí](http://www.zxspectrumnext.online/cspect/) para la descarga).
+
+Creamos la estructura en la SD donde se guardarán nuestros programas compilados:
+
+    cd /(...)/vscode_zx/
+    hdfmonkey mkdir ./CSpect/systemnext.img /devel
+
+Opcionalmente, usando `hdfmonkey`, sustituimos `autoexec.bat` de la distribución original por el que está disponible en `ToInstall/autoexec.bas`. Por ejemplo:
+
+    hdfmonkey put ./CSpect/systemnext.img ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
+
+<<<
+
+==== Configuración de ZEsarUX
+
+Modificar el archivo `zesaruxrc` (`zesaruxwinrc` en el caso de Windows), poniendo en `--mmc-file` la ruta completa al archivo tbblue.mmc`.
+
+Se puede utilizar el archivo proporcionado por la propia distribución del emulador. Si se prefiere utilizar uno descargado, renombrarlo como `tbblue.mmc`, y copiarlo en el directorio `ZEsarUX/`.
+
+Creamos la estructura en la SD donde se guardarán nuestros programas compilados:
+
+    cd /(...)/vscode_zx/
+    hdfmonkey mkdir ./ZEsarUX/tbblue.mmc /devel
+
+En el caso de MacOS
+
+    cd /(...)/vscode_zx/
+    hdfmonkey mkdir ./ZEsarUX.app/Contents/Resources/tbblue.mmc /devel
+
+Opcionalmente, usando `hdfmonkey`, sustituimos `autoexec.bat` de la distribución original por el que está disponible en `ToInstall/autoexec.bas`. Por ejemplo:
+
+    hdfmonkey put ./ZEsarUX/tbblue.mmc ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
+
+En el caso de MacOS
+
+    hdfmonkey put ./ZEsarUX.app/Contents/Resources/tbblue.mmc ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
+
+<<<
+
+== Uso
+
+=== Ficheros BAS
+
+Las tareas y scripts están diseñados para tratar con ficheros de texto, con extensión `.bas`, con codificación UTF-8, con saltos de línea windows (CRLF).
+
+Las palabras clave de NextBASIC deben estar siempre en mayúsculas (esto ofrece compatibilidad con programas que usan nombres de variable iguales a los nombres de alguna palabra clave).
+
+Es posible utilizar [caracteres unicode de bloques](https://en.wikipedia.org/wiki/Block_Elements) que serán automáticamente convertidos, así como caracteres no imprimibles, usando `` ` `` como código de escape y luego el código correspondiente, bien en decimal, o bien en hexadecimal (precedido por "`x`"). Por ejemplo, para indicar tinta roja y papel amarillo: `` `16`2`17`6``. o bien `` `x10`x02`x11`x06``. Este método también puede utilizarse para embeber pequeñas rutinas en código máquina dentro de líneas REM.
+
+Se pueden consultar todos los códigos de Sinclair originales [en este enlace](https://www.worldofspectrum.org/ZXBasicManual/zxmanappa.html). Para ZX Spectrum Next, consultar el apéndice A del manual oficial.
+
+=== Numeración de líneas
+
+Abrir el directorio "Projects" (o con el nombre que se haya definido) desde Visual Studio Code.
+
+El fichero `tasks.json` define una tarea de Visual Studio Code `Renumber NextBASIC` que, al ser invocada sobre un fichero `.bas` de texto, intentará ajustar de forma automática todos los números de línea del código.
+
+<<<
+
+=== Compilación
+
+Abrir el directorio "Projects" (o con el nombre que se haya definido) desde Visual Studio Code.
+
+El fichero `tasks.json` define varias tareas de Visual Studio Code `Build ZX Basic` y `Build NextBASIC` que, al ser invocadas sobre un fichero `.bas` de texto con código, creará un directorio `build` y, dentro de este, en el caso de NextBASIC, un fichero `.bas` con el programa y, en el caso de ZX Basic, un fichero `.bin` con el programa compilado, y un lanzador `.bas` para poder iniciarlo desde el navegador de ZX Next, ESXDOS o +3e DOS.
+
+Por ejemplo, partiendo de un fichero ZX Basic:
+
+       +--Projects/
+             |
+             +--.vscode/
+             |     |
+             |     +--tasks.json
+             |
+             +--Ejemplo.bas
+
+Tras ejecutar la tarea, se creará:
+
+       +--Projects/
+             |
+             +--.vscode/
+             |     |
+             |     +--tasks.json
+             |
+             +--Ejemplo.bas
+             |
+             +--build/
+                  |
+                  +-Ejemplo.bas
+                  +-Ejemplo.bin
+
+Los ficheros `.bas` no tienen por qué estar en la raíz del directorio `Projects`, pudiendo crearse tantos subdirectorios como se desee.
+
+<<<
+
+=== Compilación y ejecución en emulador
+
+Existen otras dos tareas llamadas `Build ... And Run (CSpect)` y `Build .. And Run (ZEsarUX)` que sirven para realizar una compilación, copiar los dos archivos (`.bin` y `.bas`) en la SD virtual del emulador correspondiente, y luego lanzarlo. Si, además, se ha configurado el archivo `autoexec.bas`, se iniciará directamente un programa donde, pulsando cualquier tecla, excepto BREAK (Mayúsculas + Espacio), se intentará ejecutar el programa compilado. Si se pulsa BREAK, se saldrá al navegador de ZX Next.
+
+Además, si se incluye un fichero `.filelist` con el mismo nombre que el fichero `.bas`, y con el nombre de otros ficheros dentro, la tarea intentará copiar también esos ficheros en la SD.
+
+Por ejemplo, partiendo de un fichero ZX Basic y un fichero `.filelist`:
+
+       +--Projects/
+             |
+             +--.vscode/
+             |     |
+             |     +--tasks.json
+             |
+             +--Ejemplo.bas
+             +--Ejemplo.filelist
+             +--Imagen1.scr
+             +--Imagen2.scr
+             +--Pantalla.bmp
+             +--Pantalla2.bmp
+
+Donde el fichero `Ejempo.filelist`tiene como contenido:
+
+        Imagen1.scr
+        Imagen2.scr
+        Pantalla.bmp
+
+Al ejecutar la tarea, no sólo se copiarán en la SD los ficheros `Ejemplo.bas` y `Ejemplo.bin`, sino que también se copiarán `Imagen1.scr`, `Imagen2.scr` y `Pantalla.bmp`, pero *no* se copiará `Pantalla2.bmp`.
+
+<<<
+
+== Copyright
+
+Copyright (c) 2020 kounch
+
+Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE
