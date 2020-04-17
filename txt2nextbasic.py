@@ -87,6 +87,9 @@ def main():
             if line:
                 # Comments and directives aren't parsed
                 if line[0] != '#':
+                    if load_addr == 0:  # Grab next line number for #autostart
+                        load_addr, _ = extract_linenumber(line)
+
                     i_line, arr_line = proc_basic(line)
                     if i_line <= prev_line:
                         str_msg = _('Wrong Line Number: {0}')
@@ -94,6 +97,7 @@ def main():
                         raise RuntimeError(str_msg.format(i_line))
                     else:
                         prev_line = i_line
+
                     if arr_line:
                         basic_data.append(arr_line)  # Parse BASIC
                 elif line.startswith('#program'):
