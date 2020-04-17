@@ -86,7 +86,7 @@ def main():
             if line:
                 # Comments and directives aren't parsed
                 if line[0] != '#':
-                    if load_addr == 0: # if they used #autostart, grab the next line number
+                    if load_addr == 0:  # Grab next line number for #autostart
                         load_addr, _ = extract_linenumber(line)
                     arr_line = proc_basic(line)
                     if arr_line:
