@@ -467,6 +467,11 @@ def process_params(str_statement):
 def process_numbers(str_statement):
     """Parses statement and expands numbers to 5-byte format"""
 
+    # Standard tokens which are also functions with integer-only forms
+    # (as stated in page 76 of ZX Spectrum Next manual)
+    # RND, PEEK, IN, USR, BIN
+    arr_intfunc = '\xa5\xbe\xbf\xc0\xc4'
+
     is_number = False
     is_intexpr = False  # Integer in int expression (NextBASIC)
     arr_numbers = []  # Number as string, position, previous char and previous
@@ -481,8 +486,9 @@ def process_numbers(str_statement):
 
         if str_char in '%\x8b':  # Int expression or MOD
             is_intexpr = True
-        elif str_char in ',=' or ord(str_char) > 164:
-            is_intexpr = False
+        elif str_char in ',=' or ord(str_char) > 164:  # Standard token
+            if str_char not in arr_intfunc:  # Not an integer-only function
+                is_intexpr = False
 
         if not is_intexpr:
             if not is_number:
