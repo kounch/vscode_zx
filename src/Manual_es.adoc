@@ -27,7 +27,10 @@ Características:
 - Integración de tareas para compilar (o convertir) y ejecutar en los emuladores ZEsarUX y CSpect
 - Funciona en Windows, MacOS y (teóricamente) Linux
 
-Se recomienda usar junto con el plugin https://github.com/jsanjose/zxbasic-vscode[ZX Spectrum BASIC syntax highlighting for Visual Studio Code].
+Se recomienda usar junto con uno de los siguientes plugins:
+
+- https://github.com/jsanjose/zxbasic-vscode[ZX Spectrum BASIC syntax highlighting for Visual Studio Code]
+- https://github.com/remy/vscode-nextbasic[NextBASIC VSCode Syntax]
 
 <<<
 
@@ -272,6 +275,28 @@ Donde el fichero `Ejempo.filelist`tiene como contenido:
         Pantalla.bmp
 
 Al ejecutar la tarea, no sólo se copiarán en la SD los ficheros `Ejemplo.bas` y `Ejemplo.bin`, sino que también se copiarán `Imagen1.scr`, `Imagen2.scr` y `Pantalla.bmp`, pero *no* se copiará `Pantalla2.bmp`.
+
+<<<
+
+=== Utilidades de línea de comandos
+
+==== Convertir un fichero binario de BASIC (+3DOS) a texto
+
+Es posible utilizar `nextbasic2txt.py` para convertir un fichero binario de BASIC (+3DOS o ESXDOS) a texto. La sintaxis es la siguiente:
+
+[source,shell]
+----
+python3 nextbasic2txt.py -i <fichero_binario.bas> -o <fichero_a_crear>
+----
+
+==== Convertir un fichero con datos binarios de BASIC en un fichero binario de BASIC (+3DOS)
+
+Es posible utilizar `txt2nextbasic.py` para convertir un fichero con datos binarios de BASIC (por ejemplo, extraidos desde un fichero .TAP con Tapir) a un fichero binario de BASIC (+3DOS o ESXDOS). La sintaxis es la siguiente:
+
+[source,shell]
+----
+python3 txt2nextbasic.py -b -i <fichero_binario> -o <fichero_a_crear.bas>
+----
 
 <<<
 

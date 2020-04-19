@@ -119,7 +119,7 @@ def parse_args():
                         required=False,
                         action='store',
                         dest='program_name',
-                        help='Texxt for #program directive')
+                        help='Text for #program directive')
 
     arguments = parser.parse_args()
 

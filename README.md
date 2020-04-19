@@ -15,7 +15,8 @@ Features:
 - Task integration to build (or convert) and run in ZEsarUX and CSpect emulators
 - Works with Windows, MacOS and (possibly) Linux
 
-Works best if used with [ZX Spectrum BASIC syntax highlighting for Visual Studio Code](https://github.com/jsanjose/zxbasic-vscode).
+Works best if used with [ZX Spectrum BASIC syntax highlighting for Visual Studio Code](https://github.com/jsanjose/zxbasic-vscode) or [NextBASIC VSCode Syntax
+](https://github.com/remy/vscode-nextbasic).
 
 ---
 
@@ -176,7 +177,8 @@ Características:
 - Integración de tareas para compilar (o convertir) y ejecutar en los emuladores ZEsarUX y CSpect
 - Funciona en Windows, MacOS y (teóricamente) Linux
 
-Se recomienda usar junto con el plugin [ZX Spectrum BASIC syntax highlighting for Visual Studio Code](https://github.com/jsanjose/zxbasic-vscode).
+Se recomienda usar junto con el plugin [ZX Spectrum BASIC syntax highlighting for Visual Studio Code](https://github.com/jsanjose/zxbasic-vscode) o [NextBASIC VSCode Syntax
+](https://github.com/remy/vscode-nextbasic).
 
 ---
 

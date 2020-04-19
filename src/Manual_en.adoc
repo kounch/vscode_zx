@@ -27,7 +27,10 @@ Features:
 - Task integration to build (or convert) and run in ZEsarUX and CSpect emulators
 - Works with Windows, MacOS and (possibly) Linux
 
-Works best if used with https://github.com/jsanjose/zxbasic-vscode[ZX Spectrum BASIC syntax highlighting for Visual Studio Code].
+Works best if used with:
+
+- https://github.com/jsanjose/zxbasic-vscode[ZX Spectrum BASIC syntax highlighting for Visual Studio Code]
+- https://github.com/remy/vscode-nextbasic[NextBASIC VSCode Syntax]
 
 <<<
 
@@ -268,6 +271,28 @@ Where `Example.filelist` has these contents:
         Screen.bmp
 
 When the task is run, `Example.bas` and `Example.bin` will be copied, and also `Image1.scr`, `Image2.scr` and `Screen.bmp`. But `Screen2.bmp` *won't*.
+
+<<<
+
+=== Command Line Utilities
+
+==== Converting a binary BASIC file (+3DOS) to text
+
+You can use `nextbasic2txt.py` to convert a binary BASIC file (+3DOS o ESXDOS) to text. Syntax is as following:
+
+[source,shell]
+----
+python3 nextbasic2txt.py -i <binary_file.bas> -o <new_file>
+----
+
+==== Convert a file with binary BASIC data to a binary BASIC file (+3DOS)
+
+It is also possible to convert, using `txt2nextbasic.py`, a file with binary BASIC data (e.g., extracted from tape file with Tapir) to a binary BASIC file  (+3DOS o ESXDOS). The syntax to use is:
+
+[source,shell]
+----
+python3 txt2nextbasic.py -b -i <binary_file> -o <new_file.bas>
+----
 
 <<<
 
