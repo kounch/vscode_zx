@@ -30,7 +30,7 @@ except (ImportError, AttributeError):
     from pathlib2 import Path
 
 __MY_NAME__ = 'nextbasic2txt.py'
-__MY_VERSION__ = '0.1'
+__MY_VERSION__ = '0.2'
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
@@ -63,12 +63,24 @@ def main():
         with open(arg_data['input'], 'rb') as f:
             bindata = f.read()
 
+    arr_str = []
+    if arg_data['name']:
+        arr_str.append('#program {0}\r\n'.format(arg_data['name']))
+
     arr_result = []
     if len(bindata) > 128 and bindata[:8] == b'PLUS3DOS' and bindata[
             15:16] == b'\x00':
         i_len = int.from_bytes(bindata[11:15], 'little')
+
+        i_saddr = int.from_bytes(bindata[18:20], 'little')
+        if i_saddr < 10000:
+            s_addr = '#autostart'
+            if i_saddr > 0:
+                s_addr += ' {0}'.format(i_saddr)
+            arr_str.append(s_addr + '\r\n')
+
         arr_bin = bindata[128:]  # Remove header
-        arr_str = procbin(arr_bin, i_len)
+        arr_str += procbin(arr_bin, i_len)
     else:
         str_msg = _('Not a valid file')
         LOGGER.error(str_msg)
@@ -86,7 +98,7 @@ def main():
 def parse_args():
     """Command Line Parser"""
 
-    parser = argparse.ArgumentParser(description='Text to NextBASIC Converter')
+    parser = argparse.ArgumentParser(description='NextBASIC to Text Converter')
     parser.add_argument('-v',
                         '--version',
                         action='version',
@@ -102,6 +114,12 @@ def parse_args():
                         action='store',
                         dest='input_path',
                         help='Input binary file with NextBASIC code')
+    parser.add_argument('-n',
+                        '--name',
+                        required=False,
+                        action='store',
+                        dest='program_name',
+                        help='Texxt for #program directive')
 
     arguments = parser.parse_args()
 
@@ -122,6 +140,11 @@ def parse_args():
             LOGGER.error(str_msg.format(i_path))
             str_msg = _('Input path does not exist!')
             raise IOError(str_msg)
+
+    p_name = ''
+    if arguments.program_name:
+        p_name = Path(arguments.program_name)
+    values['name'] = p_name
 
     values['input'] = i_path
 
