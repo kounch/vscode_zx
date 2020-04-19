@@ -223,6 +223,7 @@ def procbin(b_data, i_len):
 
             str_line += s_char
 
+        str_line = str_line.strip()
         str_line += '\r\n'
 
         arr_str.append('{0:>4} {1}'.format(line_number, str_line))
@@ -259,7 +260,7 @@ TOKENS = {
     136: 'REG',
     137: 'DPOKE',
     138: 'DPEEK',
-    139: 'MOD',
+    139: ' MOD',
     140: '<<',
     141: '>>',
     142: 'UNTIL',
