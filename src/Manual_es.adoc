@@ -1,4 +1,18 @@
 = vscode_zx
+:author: kounch
+:email: kounch@users.noreply.github.com
+:Revision:  1.0
+:description: Manual en español de vscode_zx
+:keywords: Manual, Español, Spanish, vscode_zx, ZX Spectrum Next, BASIC
+:icons: font
+:source-highlighter: rouge
+:toc: left
+:toc-title: Índice
+:toclevels: 4
+
+<<<
+
+== Descripción
 
 Tareas y scripts de Visual Studio Code para el desarrollo en NextBASIC y ZX Basic
 
@@ -6,13 +20,14 @@ Características:
 
 - Conversor de texto a ficheros `.bas` de NextBASIC
 - Función para volver a numerar un listado de NextBASIC
-- Conversión de [caracteres unicode de bloques](https://en.wikipedia.org/wiki/Block_Elements) a gráficos de bloques de Sinclair
+- Formato automático de código NextBASIC (en pruebas - Beta)
+- Conversión de https://en.wikipedia.org/wiki/Block_Elements[caracteres unicode de bloques a gráficos de bloques] de Sinclair
 - Soporte de caracteres no imprimibles usando ` como código de escape
 - Tareas para compilar con ZX Basic
 - Integración de tareas para compilar (o convertir) y ejecutar en los emuladores ZEsarUX y CSpect
 - Funciona en Windows, MacOS y (teóricamente) Linux
 
-Se recomienda usar junto con el plugin [ZX Spectrum BASIC syntax highlighting for Visual Studio Code](https://github.com/jsanjose/zxbasic-vscode).
+Se recomienda usar junto con el plugin https://github.com/jsanjose/zxbasic-vscode[ZX Spectrum BASIC syntax highlighting for Visual Studio Code].
 
 <<<
 
@@ -20,25 +35,25 @@ Se recomienda usar junto con el plugin [ZX Spectrum BASIC syntax highlighting fo
 
 === Descarga
 
-Se puede descargar un archivo ZIP con la última versión siguiendo [este enlace](https://github.com/kounch/vscode_zx/releases/latest)
+Se puede descargar un archivo ZIP con la última versión siguiendo https://github.com/kounch/vscode_zx/releases/latest[este enlace]
 
 === Software necesario
 
-- **Visual Studio Code**. Documentación, descarga, etc. [aquí](https://code.visualstudio.com/)
+- *Visual Studio Code*. Documentación, descarga, etc. https://code.visualstudio.com/[aquí]
 
-- **Python (versión 3.6 o superior)**. Documentación, descarga, etc. [aquí](https://www.python.org/)
+- *Python (versión 3.6 o superior)*. Documentación, descarga, etc. https://www.python.org/[aquí]
 
-- **ZX Basic**. Documentación, descarga, etc. [aquí](https://zxbasic.readthedocs.io). Se necesita, al menos, la versión 1.8.10 (en formato .zip o .tar.gz)
+- *ZX Basic*. Documentación, descarga, etc. https://zxbasic.readthedocs.io[aquí]. Se necesita, al menos, la versión 1.8.10 (en formato .zip o .tar.gz)
 
-- **NextLibs para ZX Basic**. Leer más [aquí](http://zxbasic.uk/nextbuild/the-nextlibs/). Descargar [aquí](http://zxbasic.uk/nextbuild/download/)
+- *NextLibs para ZX Basic*. Leer más http://zxbasic.uk/nextbuild/the-nextlibs/[aquí]. Descargar http://zxbasic.uk/nextbuild/download/[aquí]
 
 === Software opcional
 
-- **hdfmonkey**. Descarga, [aquí](http://files.zxdemo.org/gasman/speccy/hdfmonkey/). Código fuente [aquí](https://github.com/gasman/hdfmonkey). Versión compilada para Windows [aquí](http://uto.speccy.org/)
+- *hdfmonkey*. Descarga, http://files.zxdemo.org/gasman/speccy/hdfmonkey/[aquí]. Código fuente https://github.com/gasman/hdfmonkey[aquí]. Versión compilada para Windows http://uto.speccy.org/[aquí]
 
-- **CSpect**. La última versión en desarrollo se puede obtener [aquí](https://dailly.blogspot.com/)
+- *CSpect*. La última versión en desarrollo se puede obtener https://dailly.blogspot.com/[aquí]
 
-- **ZEsarUX**. Documentación, descarga, etc. [aquí](https://github.com/chernandezba/zesarux)
+- *ZEsarUX*. Documentación, descarga, etc. https://github.com/chernandezba/zesarux[aquí]
 
 <<<
 
@@ -107,16 +122,22 @@ Ahora, para cada emulador, se ha de configurar la SD para la emulación.
 
 ==== Configuración de CSpect
 
-Tras obtener un archivo de imagen de SD, renombrarlo como `systemnext.img`, y copiarlo en el directorio `CSpect/`, junto con los ficheros `enNextZX.rom` y `enNxtmmc.rom`. (Ver [aquí](https://www.specnext.com/latestdistro/) para más información y [aquí](http://www.zxspectrumnext.online/cspect/) para la descarga).
+Tras obtener un archivo de imagen de SD, renombrarlo como `systemnext.img`, y copiarlo en el directorio `CSpect/`, junto con los ficheros `enNextZX.rom` y `enNxtmmc.rom`. (Ver https://www.specnext.com/latestdistro/[aquí] para más información y http://www.zxspectrumnext.online/cspect/[aquí] para la descarga).
 
 Creamos la estructura en la SD donde se guardarán nuestros programas compilados:
 
-    cd /(...)/vscode_zx/
-    hdfmonkey mkdir ./CSpect/systemnext.img /devel
+[source,shell]
+----
+cd /(...)/vscode_zx/
+hdfmonkey mkdir ./CSpect/systemnext.img /devel
+----
 
 Opcionalmente, usando `hdfmonkey`, sustituimos `autoexec.bat` de la distribución original por el que está disponible en `ToInstall/autoexec.bas`. Por ejemplo:
 
-    hdfmonkey put ./CSpect/systemnext.img ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
+[source,shell]
+----
+hdfmonkey put ./CSpect/systemnext.img ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
+----
 
 <<<
 
@@ -128,21 +149,33 @@ Se puede utilizar el archivo proporcionado por la propia distribución del emula
 
 Creamos la estructura en la SD donde se guardarán nuestros programas compilados:
 
-    cd /(...)/vscode_zx/
-    hdfmonkey mkdir ./ZEsarUX/tbblue.mmc /devel
+[source,shell]
+----
+cd /(...)/vscode_zx/
+hdfmonkey mkdir ./ZEsarUX/tbblue.mmc /devel
+----
 
 En el caso de MacOS
 
-    cd /(...)/vscode_zx/
-    hdfmonkey mkdir ./ZEsarUX.app/Contents/Resources/tbblue.mmc /devel
+[source,shell]
+----
+cd /(...)/vscode_zx/
+hdfmonkey mkdir ./ZEsarUX.app/Contents/Resources/tbblue.mmc /devel
+----
 
 Opcionalmente, usando `hdfmonkey`, sustituimos `autoexec.bat` de la distribución original por el que está disponible en `ToInstall/autoexec.bas`. Por ejemplo:
 
-    hdfmonkey put ./ZEsarUX/tbblue.mmc ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
+[source,shell]
+----
+hdfmonkey put ./ZEsarUX/tbblue.mmc ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
+----
 
 En el caso de MacOS
 
-    hdfmonkey put ./ZEsarUX.app/Contents/Resources/tbblue.mmc ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
+[source,shell]
+----
+hdfmonkey put ./ZEsarUX.app/Contents/Resources/tbblue.mmc ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
+----
 
 <<<
 
@@ -154,15 +187,25 @@ Las tareas y scripts están diseñados para tratar con ficheros de texto, con ex
 
 Las palabras clave de NextBASIC deben estar siempre en mayúsculas (esto ofrece compatibilidad con programas que usan nombres de variable iguales a los nombres de alguna palabra clave).
 
-Es posible utilizar [caracteres unicode de bloques](https://en.wikipedia.org/wiki/Block_Elements) que serán automáticamente convertidos, así como caracteres no imprimibles, usando `` ` `` como código de escape y luego el código correspondiente, bien en decimal, o bien en hexadecimal (precedido por "`x`"). Por ejemplo, para indicar tinta roja y papel amarillo: `` `16`2`17`6``. o bien `` `x10`x02`x11`x06``. Este método también puede utilizarse para embeber pequeñas rutinas en código máquina dentro de líneas REM.
+Es posible utilizar https://en.wikipedia.org/wiki/Block_Elements[caracteres unicode de bloques] que serán automáticamente convertidos, así como caracteres no imprimibles, usando `` ` `` como código de escape y luego el código correspondiente, bien en decimal, o bien en hexadecimal (precedido por "`x`"). Por ejemplo, para indicar tinta roja y papel amarillo: `` `16`2`17`6``. o bien `` `x10`x02`x11`x06``. Este método también puede utilizarse para embeber pequeñas rutinas en código máquina dentro de líneas REM.
 
-Se pueden consultar todos los códigos de Sinclair originales [en este enlace](https://www.worldofspectrum.org/ZXBasicManual/zxmanappa.html). Para ZX Spectrum Next, consultar el apéndice A del manual oficial.
+Se pueden consultar todos los códigos de Sinclair originales https://www.worldofspectrum.org/ZXBasicManual/zxmanappa.html[en este enlace]. Para ZX Spectrum Next, consultar el apéndice A del manual oficial.
 
 === Numeración de líneas
 
 Abrir el directorio "Projects" (o con el nombre que se haya definido) desde Visual Studio Code.
 
 El fichero `tasks.json` define una tarea de Visual Studio Code `Renumber NextBASIC` que, al ser invocada sobre un fichero `.bas` de texto, intentará ajustar de forma automática todos los números de línea del código.
+
+=== Formato automático
+
+Abrir el directorio "Projects" (o con el nombre que se haya definido) desde Visual Studio Code.
+
+El fichero `tasks.json` define una tarea de Visual Studio Code `Format NextBASIC` que, al ser invocada sobre un fichero `.bas` de texto, intentará dar un formato uniforme al código. Esto implica eliminar (o añadir) espacios extra alrededor de las palabras clave (tokens) de NextBASIC, tabular con espacios los números de línea, etc.
+
+WARNING: La función de formato automático está actualmente en pruebas.
+
+CAUTION: Cada vez que se ejecuta la tarea de formato automático, la versión anterior del código del programa se guarda como una copia, con extensión `.bak`. Por tanto, si se ejecuta la tarea dos veces seguidas, podría perderse completamente el código original.
 
 <<<
 
@@ -232,9 +275,31 @@ Al ejecutar la tarea, no sólo se copiarán en la SD los ficheros `Ejemplo.bas` 
 
 <<<
 
+== Ejemplos de código
+
+Junto con la distribución se adjuntan algunos ejemplos de código.
+
+=== Ellipses.bas
+
+Ejemplo sencillo que aprovecha las posibilidades de ejecutar programas más rápidamente en NextOS.
+
+=== Blocks.bas
+
+Demostración de cómo se pueden escribir programas que usen https://en.wikipedia.org/wiki/Block_Elements[caracteres unicode de bloques].
+
+=== NextLayer2Scroll
+
+Dos ejemplos de cómo usar `LAYER` para hacer animaciones básicas. En los dos casos, lo primero que se solicita es el número de pasos que se quiere que tenga una vuelta completa de la animación. Notar cómo la versión v2 utiliza un cálculo previo para conseguir que la animación sea mucho más fluida.
+
+=== NextSprite
+
+Dos ejemplos del uso de Sprites desde NextBASIC. La versión v2 utiliza, además, los registros extendidos de NextOS (con el comando `REG`) para construir un bloque de sprites anclados a otro de referencia (en el procedimiento `CreateRelSprites`), con lo que la animación es mucho más fluida.
+
+<<<
+
 == Copyright
 
-Copyright (c) 2020 kounch
+Copyright (c) 2020 {author} 
 
 Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
 

@@ -8,6 +8,7 @@ Features:
 
 - NextBASIC text to `.bas` file converter
 - NextBASIC text renumbering
+- Next BASIC auto formatter (Beta)
 - Converts [unicode block elements](https://en.wikipedia.org/wiki/Block_Elements) to Sinclair block graphics
 - Supports non-printable characters using ` as escape character
 - Task support to compile with ZX Basic
@@ -134,15 +135,15 @@ On MacOS:
 
 ### How to use
 
+**NOTE**: Please read the included PDF manual. The following is only a small part of what can be done with this tools.
+
 #### BAS Files
 
 The tasks and scripts are designed to deal with text files, with `.bas` extension, and encoded using UTF-8, with windows line endings (CRLF).
 
 NextBASIC keywords must be written always in uppercase (this offers compatibility with programs that use variable names similar to keywords).
 
-You can use [unicode block elements](https://en.wikipedia.org/wiki/Block_Elements) which will be automatically converted. Also , it is possible to have non-printable characters, using `` ` `` as escape code, and then the desired code, as a decimal or hexadecimal number (in this case preceded by "`x`"). For example, use `` `16`2`17`6`` or `` `x10`x02`x11`x06`` to send red ink and yellow paper codes. This method can be used too to embed little machine code routines inside of REM lines.
-
-A list of Sinclair codes is available [at this link](https://www.worldofspectrum.org/ZXBasicManual/zxmanappa.html). For ZX Spectrum Next codes see appendix A, in the official manual.
+You can use [unicode block elements](https://en.wikipedia.org/wiki/Block_Elements) which will be automatically converted. Also , it is possible to have non-printable characters.
 
 #### Renumbering
 
@@ -156,61 +157,9 @@ Open the directory "Projects" with Visual Studio Code.
 
 The `tasks.json` file creates a couple of Visual Studio Code tasks named `Build ZX Basic` and `Build NextBASIC` that, when invoked with a `.bas` text file selected, creates a `build` directory and, inside of this, a `.bin` file with the compiled program if ZX Basic was selected, or a `.bas` file if NextBASIC. Also, in the case of ZX Basic, a launcher  `.bas` file is created, so it can be launched from the ZX Next Browser, ESXDOS o +3e DOS.
 
-For example, starting with this ZX Basic source file:
-
-       +--Projects/
-             |
-             +--.vscode/
-             |     |
-             |     +--tasks.json
-             |
-             +--Example.bas
-
-After running `Build ZX Basic` we will get:
-
-       +--Projects/
-             |
-             +--.vscode/
-             |     |
-             |     +--tasks.json
-             |
-             +--Example.bas
-             |
-             +--build/
-                  |
-                  +-Example.bas
-                  +-Example.bin
-
-`.bas` files do not neede to be created in the root of `Projects`, there can be as many subdirectories as you want.
-
 #### Compiling and executing with emulator
 
 For each of the compiling options, there are also two other tasks named `Build ... And Run (CSpect)` and `Build ... And Run (ZEsarUX)` which can be used to compile, copy the new created files (`.bas` and, possibly, `.bin`) inside the virtual SD for the selected emulator, and then launch the emulator. If the `autoexec.bas` file has also been changed, a small BASIC program will start, where, pressing any key but BREAK will try to start the new program. If you press BREAK, ZX Next browser will be launched instead.
-
-Also, if a file `.filelist` is added, with the same name that the `.bas` file, and with the names of other files inside, the corresponding task will try to copy these files to the SD.
-
-For example, with a ZX Basic file and a `.filelist` file:
-
-       +--Projects/
-             |
-             +--.vscode/
-             |     |
-             |     +--tasks.json
-             |
-             +--Example.bas
-             +--Example.filelist
-             +--Image1.scr
-             +--Image2.scr
-             +--Screen.bmp
-             +--Screen2.bmp
-
-Where `Example.filelist` has these contents:
-
-        Image1.scr
-        Image2.scr
-        Screen.bmp
-
-When the task is run, `Example.bas` and `Example.bin` will be copied, and also `Image1.scr`, `Image2.scr` and `Screen.bmp`. But `Screen2.bmp` *won't*.
 
 ---
 
@@ -220,6 +169,7 @@ Características:
 
 - Conversor de texto a ficheros `.bas` de NextBASIC
 - Función para volver a numerar un listado de NextBASIC
+- Formato automático de código NextBASIC (en pruebas - Beta)
 - Conversión de [caracteres unicode de bloques](https://en.wikipedia.org/wiki/Block_Elements) a gráficos de bloques de Sinclair
 - Soporte de caracteres no imprimibles usando ` como código de escape
 - Tareas para compilar con ZX Basic
@@ -350,19 +300,19 @@ En el caso de MacOS
 
 ### Uso
 
+**NOTA**: Por favor, lea el manual incluido en PDF. Lo que hay a continuación es una pequeña parte de lo que se puede hacer con estas herramientas.
+
 #### Ficheros BAS
 
 Las tareas y scripts están diseñados para tratar con ficheros de texto, con extensión `.bas`, con codificación UTF-8, con saltos de línea windows (CRLF).
 
 Las palabras clave de NextBASIC deben estar siempre en mayúsculas (esto ofrece compatibilidad con programas que usan nombres de variable iguales a los nombres de alguna palabra clave).
 
-Es posible utilizar [caracteres unicode de bloques](https://en.wikipedia.org/wiki/Block_Elements) que serán automáticamente convertidos, así como caracteres no imprimibles, usando `` ` `` como código de escape y luego el código correspondiente, bien en decimal, o bien en hexadecimal (precedido por "`x`"). Por ejemplo, para indicar tinta roja y papel amarillo: `` `16`2`17`6``. o bien `` `x10`x02`x11`x06``. Este método también puede utilizarse para embeber pequeñas rutinas en código máquina dentro de líneas REM.
-
-Se pueden consultar todos los códigos de Sinclair originales [en este enlace](https://www.worldofspectrum.org/ZXBasicManual/zxmanappa.html). Para ZX Spectrum Next, consultar el apéndice A del manual oficial.
+Es posible utilizar [caracteres unicode de bloques](https://en.wikipedia.org/wiki/Block_Elements) que serán automáticamente convertidos, así como caracteres no imprimibles.
 
 #### Numeración de líneas
 
-Abrir el directorio "Projects" (o con el nombre que se haya definido) desde Visual Studio Code.
+Abrir el directorio "Projects" (o con el nombre que se haya definido al instalar) desde Visual Studio Code.
 
 El fichero `tasks.json` define una tarea de Visual Studio Code `Renumber NextBASIC` que, al ser invocada sobre un fichero `.bas` de texto, intentará ajustar de forma automática todos los números de línea del código.
 
@@ -372,61 +322,9 @@ Abrir el directorio "Projects" (o con el nombre que se haya definido) desde Visu
 
 El fichero `tasks.json` define varias tareas de Visual Studio Code `Build ZX Basic` y `Build NextBASIC` que, al ser invocadas sobre un fichero `.bas` de texto con código, creará un directorio `build` y, dentro de este, en el caso de NextBASIC, un fichero `.bas` con el programa y, en el caso de ZX Basic, un fichero `.bin` con el programa compilado, y un lanzador `.bas` para poder iniciarlo desde el navegador de ZX Next, ESXDOS o +3e DOS.
 
-Por ejemplo, partiendo de un fichero ZX Basic:
-
-       +--Projects/
-             |
-             +--.vscode/
-             |     |
-             |     +--tasks.json
-             |
-             +--Ejemplo.bas
-
-Tras ejecutar la tarea, se creará:
-
-       +--Projects/
-             |
-             +--.vscode/
-             |     |
-             |     +--tasks.json
-             |
-             +--Ejemplo.bas
-             |
-             +--build/
-                  |
-                  +-Ejemplo.bas
-                  +-Ejemplo.bin
-
-Los ficheros `.bas` no tienen por qué estar en la raíz del directorio `Projects`, pudiendo crearse tantos subdirectorios como se desee.
-
 #### Compilación y ejecución en emulador
 
 Existen otras dos tareas llamadas `Build ... And Run (CSpect)` y `Build .. And Run (ZEsarUX)` que sirven para realizar una compilación, copiar los dos archivos (`.bin` y `.bas`) en la SD virtual del emulador correspondiente, y luego lanzarlo. Si, además, se ha configurado el archivo `autoexec.bas`, se iniciará directamente un programa donde, pulsando cualquier tecla, excepto BREAK (Mayúsculas + Espacio), se intentará ejecutar el programa compilado. Si se pulsa BREAK, se saldrá al navegador de ZX Next.
-
-Además, si se incluye un fichero `.filelist` con el mismo nombre que el fichero `.bas`, y con el nombre de otros ficheros dentro, la tarea intentará copiar también esos ficheros en la SD.
-
-Por ejemplo, partiendo de un fichero ZX Basic y un fichero `.filelist`:
-
-       +--Projects/
-             |
-             +--.vscode/
-             |     |
-             |     +--tasks.json
-             |
-             +--Ejemplo.bas
-             +--Ejemplo.filelist
-             +--Imagen1.scr
-             +--Imagen2.scr
-             +--Pantalla.bmp
-             +--Pantalla2.bmp
-
-Donde el fichero `Ejempo.filelist`tiene como contenido:
-
-        Imagen1.scr
-        Imagen2.scr
-        Pantalla.bmp
-
-Al ejecutar la tarea, no sólo se copiarán en la SD los ficheros `Ejemplo.bas` y `Ejemplo.bin`, sino que también se copiarán `Imagen1.scr`, `Imagen2.scr` y `Pantalla.bmp`, pero *no* se copiará `Pantalla2.bmp`.
 
 ---
 

@@ -1,4 +1,18 @@
 = vscode_zx
+:author: kounch
+:email: kounch@users.noreply.github.com
+:Revision:  1.0
+:description: English Manual for vscode_zx
+:keywords: Manual, English, vscode_zx, ZX Spectrum Next, BASIC
+:icons: font 
+:source-highlighter: rouge
+:toc: left
+:toc-title: Index
+:toclevels: 4
+
+<<<
+
+== Description
 
 Visual Studio Code Tasks and Scripts for NextBASIC and ZX Basic
 
@@ -6,13 +20,14 @@ Features:
 
 - NextBASIC text to `.bas` file converter
 - NextBASIC text renumbering
-- Converts [unicode block elements](https://en.wikipedia.org/wiki/Block_Elements) to Sinclair block graphics
+- Next BASIC auto formatter (Beta)
+- Converts https://en.wikipedia.org/wiki/Block_Elements[unicode block elements] to Sinclair block graphics
 - Supports non-printable characters using ` as escape character
 - Task support to compile with ZX Basic
 - Task integration to build (or convert) and run in ZEsarUX and CSpect emulators
 - Works with Windows, MacOS and (possibly) Linux
 
-Works best if used with [ZX Spectrum BASIC syntax highlighting for Visual Studio Code](https://github.com/jsanjose/zxbasic-vscode).
+Works best if used with https://github.com/jsanjose/zxbasic-vscode[ZX Spectrum BASIC syntax highlighting for Visual Studio Code].
 
 <<<
 
@@ -20,25 +35,25 @@ Works best if used with [ZX Spectrum BASIC syntax highlighting for Visual Studio
 
 === Download
 
-A ZIP file with the latest version is available following [this link](https://github.com/kounch/vscode_zx/releases/latest)
+A ZIP file with the latest version is available following https://github.com/kounch/vscode_zx/releases/latest[this link]
 
 === Software Requirements
 
-- **Visual Studio Code**. Docs, downloads, etc. [here](https://code.visualstudio.com/)
+- *Visual Studio Code*. Docs, downloads, etc. https://code.visualstudio.com/[here]
 
-- **Python (version 3.6 or later)**. Docs, downloads, etc. [here](https://www.python.org/)
+- *Python (version 3.6 or later)*. Docs, downloads, etc. https://www.python.org/[here]
 
-- **ZX Basic**. Version 1.8.10 or later (.zip or .tar.gz). Docs, download, etcs. [here](https://zxbasic.readthedocs.io)
+- *ZX Basic*. Version 1.8.10 or later (.zip or .tar.gz). Docs, download, etcs. https://zxbasic.readthedocs.io[here]
 
-- **NextLibs for ZX Basic**. More info [here](http://zxbasic.uk/nextbuild/the-nextlibs/). Download [here](http://zxbasic.uk/nextbuild/download/)
+- *NextLibs for ZX Basic*. More info http://zxbasic.uk/nextbuild/the-nextlibs/[here]. Download http://zxbasic.uk/nextbuild/download/[here]
 
 === Optional Software
 
-- **hdfmonkey**. Download, [here](http://files.zxdemo.org/gasman/speccy/hdfmonkey/). Source Code [here](https://github.com/gasman/hdfmonkey). Binary for Windows [here](http://uto.speccy.org/)
+- *hdfmonkey*. Download, http://files.zxdemo.org/gasman/speccy/hdfmonkey/[here]. Source Code https://github.com/gasman/hdfmonkey[here]. Binary for Windows http://uto.speccy.org/[here]
 
-- **CSpect**. The latest development version can be found [here](https://dailly.blogspot.com/)
+- *CSpect*. The latest development version can be found https://dailly.blogspot.com/[here]
 
-- **ZEsarUX**. Docs, downloads, etc. [here](https://github.com/chernandezba/zesarux)
+- *ZEsarUX*. Docs, downloads, etc. https://github.com/chernandezba/zesarux[here]
 
 <<<
 
@@ -103,16 +118,22 @@ Now we have to set up the virtual SD card for each emulator.
 
 ==== CSpect configuration
 
-After obtaining an SD image file, rename it as `systemnext.img`, and copy to `CSpect/` directory, with the files `enNextZX.rom` and `enNxtmmc.rom`. (Read [here](https://www.specnext.com/latestdistro/) and [here](http://www.zxspectrumnext.online/cspect/) to download).
+After obtaining an SD image file, rename it as `systemnext.img`, and copy to `CSpect/` directory, with the files `enNextZX.rom` and `enNxtmmc.rom`. (Read https://www.specnext.com/latestdistro/[here] and http://www.zxspectrumnext.online/cspect/[here] to download).
 
 Create the SD directory where the compiled software will be put:
 
-    cd /(...)/vscode_zx/
-    hdfmonkey mkdir ./CSpect/systemnext.img /devel
+[source,shell]
+----
+cd /(...)/vscode_zx/
+hdfmonkey mkdir ./CSpect/systemnext.img /devel
+----
 
 Optionally, using `hdfmonkey`, we can replace the original distro `autoexec.bat` for the one availble in `ToInstall/autoexec.bas`. For example:
 
-    hdfmonkey put ./CSpect/systemnext.img ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
+[source,shell]
+----
+hdfmonkey put ./CSpect/systemnext.img ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
+----
 
 <<<
 
@@ -124,21 +145,33 @@ You can use the file that comes with the emulator distribution. If you prefer us
 
 The, create the structure in the virtual SD where the compiled software will be copied:
 
-    cd /(...)/vscode_zx/
-    hdfmonkey mkdir ./ZEsarUX/tbblue.mmc /devel
+[source,shell]
+----
+cd /(...)/vscode_zx/
+hdfmonkey mkdir ./ZEsarUX/tbblue.mmc /devel
+----
 
 If you are using MacOS:
 
-    cd /(...)/vscode_zx/
-    hdfmonkey mkdir ./ZEsarUX.app/Contents/Resources/tbblue.mmc /devel
+[source,shell]
+----
+cd /(...)/vscode_zx/
+hdfmonkey mkdir ./ZEsarUX.app/Contents/Resources/tbblue.mmc /devel
+----
 
 Optionally, using `hdfmonkey`, we can replace the original distro `autoexec.bat` for the one availble in `ToInstall/autoexec.bas`. For example:
 
-    hdfmonkey put ./ZEsarUX/tbblue.mmc ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
+[source,shell]
+----
+hdfmonkey put ./ZEsarUX/tbblue.mmc ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
+----
 
 On MacOS:
 
-    hdfmonkey put ./ZEsarUX.app/Contents/Resources/tbblue.mmc ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
+[source,shell]
+----
+hdfmonkey put ./ZEsarUX.app/Contents/Resources/tbblue.mmc ./ToInstall/autoexec.bat /nextzxos/autoexec.bas
+----
 
 <<<
 
@@ -150,15 +183,25 @@ The tasks and scripts are designed to deal with text files, with `.bas` extensio
 
 NextBASIC keywords must be written always in uppercase (this offers compatibility with programs that use variable names similar to keywords).
 
-You can use [unicode block elements](https://en.wikipedia.org/wiki/Block_Elements) which will be automatically converted. Also , it is possible to have non-printable characters, using `` ` `` as escape code, and then the desired code, as a decimal or hexadecimal number (in this case preceded by "`x`"). For example, use `` `16`2`17`6`` or `` `x10`x02`x11`x06`` to send red ink and yellow paper codes. This method can be used too to embed little machine code routines inside of REM lines.
+You can use https://en.wikipedia.org/wiki/Block_Elements[unicode block elements] which will be automatically converted. Also , it is possible to have non-printable characters, using `` ` `` as escape code, and then the desired code, as a decimal or hexadecimal number (in this case preceded by "`x`"). For example, use `` `16`2`17`6`` or `` `x10`x02`x11`x06`` to send red ink and yellow paper codes. This method can be used too to embed little machine code routines inside of REM lines.
 
-A list of Sinclair codes is available [at this link](https://www.worldofspectrum.org/ZXBasicManual/zxmanappa.html). For ZX Spectrum Next codes see appendix A, in the official manual.
+A list of Sinclair codes is available https://www.worldofspectrum.org/ZXBasicManual/zxmanappa.html[at this link]. For ZX Spectrum Next codes see appendix A, in the official manual.
 
 === Renumbering
 
 Open the directory "Projects" with Visual Studio Code.
 
 The `tasks.json` file creates a Visual Studio Code task named `Renumber NextBASIC`. When invoked with a `.bas` text file selected, tries to renumber the source code content.
+
+=== Formatting
+
+Open the directory "Projects" with Visual Studio Code.
+
+The `tasks.json` file creates a Visual Studio Code task named `Format NextBASIC`. When invoked with a `.bas` text file selected, tries to format the source code in a uniform way. This means adding (or removing) extra spaces rounding NextBASIC tokens, indenting with spaces line numbers, etc.
+
+WARNING: Automatic code formatting is, at this moment, a beta feature.
+
+CAUTION: Every time that formatting is applied, the previous version of source code is kept as a coopy, with extension `.bak`. If the task is execute twice, you can lose the original source code.
 
 <<<
 
@@ -225,6 +268,28 @@ Where `Example.filelist` has these contents:
         Screen.bmp
 
 When the task is run, `Example.bas` and `Example.bin` will be copied, and also `Image1.scr`, `Image2.scr` and `Screen.bmp`. But `Screen2.bmp` *won't*.
+
+<<<
+
+== Code Examples
+
+Some source code examples are included with the software distribution.
+
+=== Ellipses.bas
+
+Simple example that takes advantage of the possibility to run software faster with NextOS.
+
+=== Blocks.bas
+
+Demonstration of how you can write a program using usen https://en.wikipedia.org/wiki/Block_Elements[unicode block characters].
+
+=== NextLayer2Scroll
+
+Two basic animation examples using `LAYER`. The first thing that the programs ask for is the number of steps for each full animation loop. Take note tha version v2 makes a calculation step in order to make a more smooth animation.
+
+=== NextSprite
+
+Two exampls using Sprites with NextBASIC. Version v2 uses extended NextOS registers to build a block of anchored sprites (see procedure `CreateRelSprites`), so the animation is also much smoother.
 
 <<<
 
