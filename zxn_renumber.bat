@@ -64,7 +64,7 @@ IF /I "%ACTION%"=="format" (
         ECHO Error^^!^^!^^!
         exit /b %RETVAL%
     )
-    py -3 "%MYPATH%\nextbasic2txt.py" -i "%FILEDIR%\%FILENAME%.tmp.bas" -o "%FULLFILE%"
+    py -3 "%MYPATH%\nextbasic2txt.py" -i "%FILEDIR%\%FILENAME%.tmp.bas" -o "%FULLFILE%" -n "%FILENAME%"
     SET RETVAL=%ERRORLEVEL%
     IF NOT %RETVAL% EQU 0 (
         ECHO Error^^!^^!^^!
