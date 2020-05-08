@@ -190,6 +190,8 @@ You can use https://en.wikipedia.org/wiki/Block_Elements[unicode block elements]
 
 A list of Sinclair codes is available https://www.worldofspectrum.org/ZXBasicManual/zxmanappa.html[at this link]. For ZX Spectrum Next codes see appendix A, in the official manual.
 
+NOTE: To launch any of the following tasks, you have to use menu option `Terminal->Run Build Task...` or the equivalente keyboard shortcut (for example: Command+Shitf+B on MacOS).
+
 === Renumbering
 
 Open the directory "Projects" with Visual Studio Code.

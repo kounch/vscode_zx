@@ -194,6 +194,8 @@ Es posible utilizar https://en.wikipedia.org/wiki/Block_Elements[caracteres unic
 
 Se pueden consultar todos los códigos de Sinclair originales https://www.worldofspectrum.org/ZXBasicManual/zxmanappa.html[en este enlace]. Para ZX Spectrum Next, consultar el apéndice A del manual oficial.
 
+NOTE: Para ejecutar las tareas que se describen a continuación, se debe usar la opción de menú `Terminal->Run Build Task...` o la combinación de teclas equivalente (por ejemplo: Comando+Mayúsculas+B en MacOS).
+
 === Numeración de líneas
 
 Abrir el directorio "Projects" (o con el nombre que se haya definido) desde Visual Studio Code.

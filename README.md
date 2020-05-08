@@ -146,6 +146,8 @@ NextBASIC keywords must be written always in uppercase (this offers compatibilit
 
 You can use [unicode block elements](https://en.wikipedia.org/wiki/Block_Elements) which will be automatically converted. Also , it is possible to have non-printable characters.
 
+**NOTE**: To launch any of the following tasks, you have to use menu option `Terminal->Run Build Task...` or the equivalente keyboard shortcut (for example: Command+Shitf+B on MacOS).
+
 #### Renumbering
 
 Open the directory "Projects" with Visual Studio Code.
@@ -311,6 +313,8 @@ Las tareas y scripts están diseñados para tratar con ficheros de texto, con ex
 Las palabras clave de NextBASIC deben estar siempre en mayúsculas (esto ofrece compatibilidad con programas que usan nombres de variable iguales a los nombres de alguna palabra clave).
 
 Es posible utilizar [caracteres unicode de bloques](https://en.wikipedia.org/wiki/Block_Elements) que serán automáticamente convertidos, así como caracteres no imprimibles.
+
+**NOTA**: Para ejecutar las tareas que se describen a continuación, se debe usar la opción de menú `Terminal->Run Build Task...` o la combinación de teclas equivalente (por ejemplo: Comando+Mayúsculas+B en MacOS).
 
 #### Numeración de líneas
 
