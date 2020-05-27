@@ -216,18 +216,22 @@ def proc_basic(line):
     """
 
     i_line, line = extract_linenumber(line)  # Line number as int
-    line = convert_char(line)  # Replace all known UTF-9 characters
+    line = convert_char(line)  # Replace all known UTF-8 characters
     line, comment = extract_comment(line)  # REM comments won't be parsed
     arr_statements = extract_statements(line)  # Split quoted strings and ':'
 
     line_bin = ''
+    dot_mode = False
     for str_sttmnt in arr_statements:
         if str_sttmnt:
             chk_sttmnt = str_sttmnt.strip()
             if chk_sttmnt and chk_sttmnt[0] == ':':
                 chk_sttmnt = chk_sttmnt[1:].strip()
+                dot_mode = False
             # Don't process quoted text or dot commands
-            if chk_sttmnt and chk_sttmnt[0] != '"' and chk_sttmnt[0] != '.':
+            if chk_sttmnt[0] == '.':
+                dot_mode = True
+            if chk_sttmnt and chk_sttmnt[0] != '"' and not dot_mode:
                 str_sttmnt = process_tokens(str_sttmnt)
                 str_sttmnt = process_params(str_sttmnt)
                 str_sttmnt = process_numbers(str_sttmnt)
