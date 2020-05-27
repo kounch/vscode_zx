@@ -90,7 +90,7 @@ def main():
                     if load_addr == 0:  # Grab next line number for #autostart
                         load_addr, _ = extract_linenumber(line)
 
-                    i_line, arr_line = proc_basic(line)
+                    i_line, arr_line = proc_basic(line, arg_data['no_trim'])
                     if i_line <= prev_line:
                         str_msg = _('Wrong Line Number: {0}')
                         LOGGER.error(str_msg.format(i_line))
@@ -161,6 +161,11 @@ def parse_args():
                         action='store_true',
                         dest='is_binary',
                         help='Input file is binary BASIC data')
+    parser.add_argument('-d',
+                        '--dont_trim',
+                        action='store_true',
+                        dest='dont_trim',
+                        help='Do not trim spaces')
 
     arguments = parser.parse_args()
 
@@ -186,6 +191,10 @@ def parse_args():
     if arguments.is_binary:
         is_binary = True
 
+    dont_trim = False
+    if arguments.dont_trim:
+        dont_trim = True
+
     if i_path:
         if not i_path.exists():
             str_msg = _('Path not found: {0}')
@@ -204,11 +213,12 @@ def parse_args():
     values['output'] = o_path
     values['start_addr'] = s_addr
     values['is_binary'] = is_binary
+    values['no_trim'] = dont_trim
 
     return values
 
 
-def proc_basic(line):
+def proc_basic(line, no_trim=False):
     """
        Does processing on a BASIC line, replacing text tokens, params, numbers,
        etc. with Sinclair ASCII characters. It also extracts line number apart.
@@ -232,7 +242,7 @@ def proc_basic(line):
             if chk_sttmnt[0] == '.':
                 dot_mode = True
             if chk_sttmnt and chk_sttmnt[0] != '"' and not dot_mode:
-                str_sttmnt = process_tokens(str_sttmnt)
+                str_sttmnt = process_tokens(str_sttmnt, no_trim)
                 str_sttmnt = process_params(str_sttmnt)
                 str_sttmnt = process_numbers(str_sttmnt)
         line_bin += str_sttmnt
@@ -361,7 +371,7 @@ def extract_statements(line):
     return arr_statements
 
 
-def process_tokens(str_statement):
+def process_tokens(str_statement, no_trim=False):
     """ Converts token strings in statement to Sinclair ASCII"""
 
     # Tokens with spaces are processed first
@@ -410,7 +420,7 @@ def process_tokens(str_statement):
                 is_word = is_symbol = False
                 str_result += find_token(str_word)
 
-            if str_char != ' ':
+            if str_char != ' ' and not no_trim:
                 str_result += str_char
 
     # Last remaining word
