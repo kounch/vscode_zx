@@ -238,13 +238,14 @@ def proc_basic(line, no_trim=False):
             if chk_sttmnt and chk_sttmnt[0] == ':':
                 chk_sttmnt = chk_sttmnt[1:].strip()
                 dot_mode = False
-            # Don't process quoted text or dot commands
-            if chk_sttmnt[0] == '.':
-                dot_mode = True
-            if chk_sttmnt and chk_sttmnt[0] != '"' and not dot_mode:
-                str_sttmnt = process_tokens(str_sttmnt, no_trim)
-                str_sttmnt = process_params(str_sttmnt)
-                str_sttmnt = process_numbers(str_sttmnt)
+            if chk_sttmnt:
+                # Don't process quoted text or dot commands
+                if chk_sttmnt[0] == '.':
+                    dot_mode = True
+                if chk_sttmnt[0] != '"' and not dot_mode:
+                    str_sttmnt = process_tokens(str_sttmnt, no_trim)
+                    str_sttmnt = process_params(str_sttmnt)
+                    str_sttmnt = process_numbers(str_sttmnt)
         line_bin += str_sttmnt
     line_bin += comment + '\x0d'
     line_bin = [ord(c) for c in line_bin]
