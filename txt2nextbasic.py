@@ -487,8 +487,8 @@ def process_numbers(str_statement):
     # RND, PEEK, IN, USR, BIN
     arr_intfunc = '\xa5\xbe\xbf\xc0\xc4'
     # Tokens that never have integer expressions directly behind
-    # LET
-    arr_nonint = '\xf1'
+    # LET, FOR
+    arr_nonint = '\xf1\xEB'
 
     is_number = False
     is_intexpr = False  # Integer in int expression (NextBASIC)
