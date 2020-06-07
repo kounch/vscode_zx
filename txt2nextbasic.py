@@ -486,9 +486,13 @@ def process_numbers(str_statement):
     # (as stated in page 76 of ZX Spectrum Next manual)
     # RND, PEEK, IN, USR, BIN
     arr_intfunc = '\xa5\xbe\xbf\xc0\xc4'
+    # Tokens that never have integer expressions directly behind
+    # LET
+    arr_nonint = '\xf1'
 
     is_number = False
     is_intexpr = False  # Integer in int expression (NextBASIC)
+    not_intexpr = False  # Non integer assignment
     arr_numbers = []  # Number as string, position, previous char and previous
     # part of statement
     chr_prev = ''
@@ -499,11 +503,17 @@ def process_numbers(str_statement):
         if i:
             chr_prev = str_statement[i - 1]
 
+        if str_char in arr_nonint:
+            not_intexpr = True
+
         if str_char in '%\x8b':  # Int expression or MOD
             is_intexpr = True
-        elif str_char in ',=' or ord(str_char) > 164:  # Standard token
+        elif str_char in ',' or ord(str_char) > 164:  # Standard token
             if str_char not in arr_intfunc:  # Not an integer-only function
                 is_intexpr = False
+        elif str_char in '=' and not_intexpr:  # Looks like a LET assignment
+            is_intexpr = False
+            not_intexpr = False
 
         if not is_intexpr:
             if not is_number:
