@@ -960,7 +960,7 @@ CHARS = {
     '\u2588': '\x8f'  # Full block
 }
 
-PRENUM = ' =(,+-*/<>#;'
+PRENUM = ' =(,+-*/<>#;~'
 for str_tok in TOKENS:
     if TOKENS[str_tok][1]:
         PRENUM += chr(TOKENS[str_tok][0])
