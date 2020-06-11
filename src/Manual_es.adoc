@@ -1,5 +1,7 @@
 = vscode_zx
 :author: kounch
+:revnumber: 1.1.1
+:doctype: book
 :email: kounch@users.noreply.github.com
 :Revision:  1.0
 :description: Manual en español de vscode_zx
