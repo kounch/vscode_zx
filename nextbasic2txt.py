@@ -30,7 +30,7 @@ except (ImportError, AttributeError):
     from pathlib2 import Path
 
 __MY_NAME__ = 'nextbasic2txt.py'
-__MY_VERSION__ = '0.2'
+__MY_VERSION__ = '1.1.1'
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
