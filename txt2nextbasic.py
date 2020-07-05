@@ -35,7 +35,7 @@ except (ImportError, AttributeError):
     from pathlib2 import Path
 
 __MY_NAME__ = 'txt2nextbasic.py'
-__MY_VERSION__ = '1.1.1'
+__MY_VERSION__ = '1.1.2'
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
@@ -844,7 +844,7 @@ TOKENS = {
     'CD': [160, False],
     'MKDIR': [161, False],
     'RMDIR': [162, False],
-    'SPECTRUM': [163, False],
+    'SPECTRUM': [163, True],
     'PLAY': [164, False],
     'RND': [165, True],
     'INKEY\\$': [166, False],
