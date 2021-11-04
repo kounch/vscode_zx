@@ -336,7 +336,7 @@ Existen otras dos tareas llamadas `Build ... And Run (CSpect)` y `Build .. And R
 
 ## Copyright
 
-Copyright (c) 2020 kounch
+Copyright (c) 2020-2021 kounch
 
 Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
 

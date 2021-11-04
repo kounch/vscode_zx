@@ -1,6 +1,6 @@
 #program nextsprite
 #autostart
-  10 ; NextSprite Demo V2 - Copyright (c) 2020 @kounch
+  10 ; NextSprite Demo V2 - Copyright (c) 2020-2021 @kounch
   20 ; This program is free software, you can redistribute
   30 ; it and/or modify it under the terms of the
   40 ; GNU General Public License 

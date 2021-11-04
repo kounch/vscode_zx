@@ -1,5 +1,5 @@
 # zxb_build.sh
-# Copyright (C) 2020 kounch
+# Copyright (C) 2020-2021 kounch
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR @Kounch, 2020.
 #

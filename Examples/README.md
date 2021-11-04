@@ -54,7 +54,7 @@ Pequeño programa clásico de Spectrum con cálculos y dibujo en pantalla, que m
 
 ## Copyright
 
-Copyright (c) 2020 kounch
+Copyright (c) 2020-2021 kounch
 
 Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
 

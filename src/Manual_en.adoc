@@ -1,6 +1,6 @@
 = vscode_zx
 :author: kounch
-:revnumber: 1.1.1
+:revnumber: 1.1.2
 :doctype: book
 :email: kounch@users.noreply.github.com
 :Revision:  1.0
@@ -324,7 +324,7 @@ Two exampls using Sprites with NextBASIC. Version v2 uses extended NextOS regist
 
 == Copyright
 
-Copyright (c) 2020 kounch
+Copyright (c) 2020-2021 kounch
 
 Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
 

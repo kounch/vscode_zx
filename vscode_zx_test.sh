@@ -18,7 +18,6 @@
 
 mypath=`dirname "$0"`
 fullfile=$1
-action=$2
 filename=$(basename "$fullfile")
 extension="${filename##*.}"
 filename="${filename%.*}"
@@ -28,7 +27,7 @@ python3bin=python3
 
 if [ -x "$(command -v gettext)" ]; then
     . gettext.sh
-    export TEXTDOMAIN=zxn_renumber.sh
+    export TEXTDOMAIN=zxb_build.sh
     export TEXTDOMAINDIR=$mypath/locale
 else
     shopt -s expand_aliases
@@ -55,41 +54,34 @@ if [ $retval != 0 ]; then
     exit $retVal
 fi
 
-if [ -z $action ]; then
-    action="renumber"
+echo $(eval_gettext "Converting bin \$filename to BAS txt..")
+mkdir -p "$filedir/tests"
+"$python3bin" "$mypath/nextbasic2txt.py" -i "$fullfile" -o "$filedir/tests/${filename}_txt_orig.bas"
+retval=$?
+if [ $retval != 0 ]; then
+    echo $(gettext "Error while converting")
+    exit $retVal
 fi
 
-shopt -s nocasematch
-if [[ $action == "renumber" ]]; then
-    echo $(eval_gettext "Renumbering \$filename")
-    "$python3bin" "$mypath/rennextbasic.py" -i "$fullfile"
-    retval=$?
-    if [ $retval != 0 ]; then
-        echo $(gettext "Error while renumbering")
-        exit $retVal
-    fi
+echo $(eval_gettext "Converting BAS txt...")
+mkdir -p "$filedir/build"
+"$python3bin" "$mypath/txt2nextbasic.py" -i "$filedir/tests/${filename}_txt_orig.bas" -o "$filedir/tests/${filename}_bin.bas"
+retval=$?
+if [ $retval != 0 ]; then
+    echo $(gettext "Error while converting")
+    exit $retVal
 fi
-shopt -u nocasematch
 
-shopt -s nocasematch
-if [[ $action == "format" ]]; then
-    echo $(eval_gettext "Formatting \$filename")
-    cp "$fullfile" "$filedir/$filename.bas.bak"
-    "$python3bin" "$mypath/txt2nextbasic.py" -i "$fullfile" -o "$filedir/$filename.tmp.bas"
-    retval=$?
-    if [ $retval != 0 ]; then
-        echo $(gettext "Error while Analyzing")
-        exit $retVal
-    fi
-    "$python3bin" "$mypath/nextbasic2txt.py" -i "$filedir/$filename.tmp.bas" -o "$fullfile" -n "$filename"
-    retval=$?
-    if [ $retval != 0 ]; then
-        echo $(gettext "Error while Formatting")
-        exit $retVal
-    fi
-    rm "$filedir/$filename.tmp.bas" 
+echo $(eval_gettext "Converting new bin to BAS txt..")
+mkdir -p "$filedir/tests"
+"$python3bin" "$mypath/nextbasic2txt.py" -i "$filedir/tests/${filename}_bin.bas" -o "$filedir/tests/${filename}_txt.bas"
+retval=$?
+if [ $retval != 0 ]; then
+    echo $(gettext "Error while converting")
+    exit $retVal
 fi
-shopt -u nocasematch
 
-echo $(gettext "Finished")
-exit 0
+echo $(eval_gettext "Comparing TXT files..")
+
+# echo "$filedir/tests/${filename}_txt_orig.bas vs $filedir/tests/${filename}_txt.bas"
+diff  "$filedir/tests/${filename}_txt_orig.bas" "$filedir/tests/${filename}_txt.bas"
