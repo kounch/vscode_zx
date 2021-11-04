@@ -5,7 +5,7 @@
 """
 Text NextBASIC Renumbering
 
-    Copyright (c) 2020 @Kounch
+    Copyright (c) 2020-2021 @Kounch
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,13 +28,13 @@ import logging
 import re
 import gettext
 
-try:
+if sys.version_info > (3, 5):
     from pathlib import Path
-except (ImportError, AttributeError):
+else:
     from pathlib2 import Path
 
 __MY_NAME__ = 'rennextbasic.py'
-__MY_VERSION__ = '1.1.1'
+__MY_VERSION__ = '1.1.2'
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
