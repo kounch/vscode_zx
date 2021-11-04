@@ -4,7 +4,7 @@
 # Do not change the previous lines. See PEP 8, PEP 263.
 """
 Text to NextBASIC File Converter for ZX Spectrum Next (+3e/ESXDOS compatible)
-    Copyright (c) 2020 @Kounch
+    Copyright (c) 2020-2021 @Kounch
 
     File Structure and Headers obtained from
     http://www.worldofspectrum.org/ZXSpectrum128+3Manual/chapter8pt27.html
@@ -29,13 +29,13 @@ import shlex
 import re
 import gettext
 
-try:
+if sys.version_info > (3, 5):
     from pathlib import Path
-except (ImportError, AttributeError):
+else:
     from pathlib2 import Path
 
 __MY_NAME__ = 'txt2nextbasic.py'
-__MY_VERSION__ = '1.1.2'
+__MY_VERSION__ = '1.1.3'
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
@@ -90,7 +90,8 @@ def main():
                     if load_addr == 0:  # Grab next line number for #autostart
                         load_addr, _ = extract_linenumber(line)
 
-                    i_line, arr_line = proc_basic(line, arg_data['no_trim'])
+                    i_line, arr_line = proc_basic(line, arg_data['no_trim'],
+                                                  arg_data['remove_comments'])
                     if i_line <= prev_line:
                         str_msg = _('Wrong Line Number: {0}')
                         LOGGER.error(str_msg.format(i_line))
@@ -166,6 +167,13 @@ def parse_args():
                         action='store_true',
                         dest='dont_trim',
                         help='Do not trim spaces')
+    parser.add_argument('-r',
+                        '--remove_comments',
+                        action='store',
+                        nargs='?',
+                        const='-1:999999',
+                        dest='remove_comments',
+                        help='Remove comments')
 
     arguments = parser.parse_args()
 
@@ -195,6 +203,12 @@ def parse_args():
     if arguments.dont_trim:
         dont_trim = True
 
+    remove_comments = []
+    if arguments.remove_comments:
+        arr_tmp = arguments.remove_comments.split(':')
+        for i_tmp in arr_tmp:
+            remove_comments.append(int(i_tmp))
+
     if i_path:
         if not i_path.exists():
             str_msg = _('Path not found: {0}')
@@ -214,11 +228,12 @@ def parse_args():
     values['start_addr'] = s_addr
     values['is_binary'] = is_binary
     values['no_trim'] = dont_trim
+    values['remove_comments'] = remove_comments
 
     return values
 
 
-def proc_basic(line, no_trim=False):
+def proc_basic(line, no_trim=False, remove_comments=[]):
     """
        Does processing on a BASIC line, replacing text tokens, params, numbers,
        etc. with Sinclair ASCII characters. It also extracts line number apart.
@@ -228,6 +243,13 @@ def proc_basic(line, no_trim=False):
     i_line, line = extract_linenumber(line)  # Line number as int
     line = convert_char(line)  # Replace all known UTF-8 characters
     line, comment = extract_comment(line)  # REM comments won't be parsed
+    if remove_comments:
+        i_remove_c_end = 999999
+        if len(remove_comments) > 1:
+            i_remove_c_end = remove_comments[1]
+        if i_line >= remove_comments[0] and i_line <= i_remove_c_end:
+            comment = ''
+
     arr_statements = extract_statements(line)  # Split quoted strings and ':'
 
     line_bin = ''
