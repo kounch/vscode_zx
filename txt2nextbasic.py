@@ -4,7 +4,7 @@
 # Do not change the previous lines. See PEP 8, PEP 263.
 """
 Text to NextBASIC File Converter for ZX Spectrum Next (+3e/ESXDOS compatible)
-    Copyright (c) 2020-2021 @Kounch
+    Copyright (c) 2020-2022 @Kounch
 
     File Structure and Headers obtained from
     http://www.worldofspectrum.org/ZXSpectrum128+3Manual/chapter8pt27.html
