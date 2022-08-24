@@ -25,7 +25,6 @@ import sys
 import os
 import argparse
 import logging
-import shlex
 import re
 import gettext
 
@@ -49,7 +48,7 @@ path_locale = os.path.dirname(__file__)
 path_locale = os.path.join(path_locale, 'locale')
 gettext.bindtextdomain(__MY_NAME__, localedir=path_locale)
 gettext.textdomain(__MY_NAME__)
-_ = gettext.gettext
+_trns_ = gettext.gettext
 
 
 def main():
@@ -58,7 +57,7 @@ def main():
     # Check Python version
     arr_v = sys.version_info
     if arr_v[0] < 3 or (arr_v[0] == 3 and arr_v[1] < 6):
-        str_msg = _('You need version 3.6 or later of Python')
+        str_msg = _trns_('You need version 3.6 or later of Python')
         LOGGER.error(str_msg)
         raise RuntimeError(str_msg)
 
@@ -93,7 +92,7 @@ def main():
                     i_line, arr_line = proc_basic(line, arg_data['no_trim'],
                                                   arg_data['remove_comments'])
                     if i_line <= prev_line:
-                        str_msg = _('Wrong Line Number: {0}')
+                        str_msg = _trns_('Wrong Line Number: {0}')
                         LOGGER.error(str_msg.format(i_line))
                         raise RuntimeError(str_msg.format(i_line))
                     else:
@@ -112,7 +111,7 @@ def main():
                     else:
                         load_addr = 0
                 else:
-                    str_msg = _('Cannot parse line: {0}')
+                    str_msg = _trns_('Cannot parse line: {0}')
                     LOGGER.error(str_msg.format(line))
                     raise RuntimeError(str_msg.format(line))
 
@@ -211,15 +210,15 @@ def parse_args():
 
     if i_path:
         if not i_path.exists():
-            str_msg = _('Path not found: {0}')
+            str_msg = _trns_('Path not found: {0}')
             LOGGER.error(str_msg.format(i_path))
-            str_msg = _('Input path does not exist!')
+            str_msg = _trns_('Input path does not exist!')
             raise IOError(str_msg)
     else:
         if not b_name:
-            str_msg = _('A binary name is required!')
+            str_msg = _trns_('A binary name is required!')
             LOGGER.error(str_msg)
-            str_msg = _('No name!')
+            str_msg = _trns_('No name!')
             raise ValueError(str_msg)
 
     values['name'] = b_name
@@ -415,7 +414,6 @@ def process_tokens(str_statement, no_trim=False):
     str_result = ''
     is_word = is_symbol = False
     str_word = ''  # Temporary storage of word (possibly a token)
-    i = 0
     # Compose a list of all possible words in statement, split accordingly
     for str_char in str_statement:
         if str_char in str_letters:  # Word
@@ -464,7 +462,6 @@ def find_token(str_word):
         chr_token = chr(TOKENS[token][0])
         if str_word == str_token:
             str_result = chr_token
-            b_token = True
             break
 
     return str_result
