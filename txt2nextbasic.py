@@ -4,7 +4,7 @@
 # Do not change the previous lines. See PEP 8, PEP 263.
 """
 Text to NextBASIC File Converter for ZX Spectrum Next (+3e/ESXDOS compatible)
-    Copyright (c) 2020-2022 @Kounch
+    Copyright (c) 2020-2025 @Kounch
 
     File Structure and Headers obtained from
     http://www.worldofspectrum.org/ZXSpectrum128+3Manual/chapter8pt27.html
@@ -34,7 +34,7 @@ else:
     from pathlib2 import Path
 
 __MY_NAME__ = 'txt2nextbasic.py'
-__MY_VERSION__ = '1.1.3'
+__MY_VERSION__ = '1.1.4'
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
@@ -270,6 +270,8 @@ def proc_basic(line, no_trim=False, remove_comments=[]):
         line_bin += str_sttmnt
     line_bin += comment + '\x0d'
     line_bin = [ord(c) for c in line_bin]
+    # Replace non ASCII chars with spaces
+    line_bin = [32 if item > 255 else item for item in line_bin]
     line_bin = bytes(line_bin)
 
     line_number = i_line.to_bytes(2, byteorder='big')
@@ -743,6 +745,7 @@ def convert_float(newfloat):
 # -------
 class Plus3DosFile(object):
     """+3DOS File Object"""
+
     def __init__(self, filetype=0, content=None, load_addr=0x8000):
         self.issue = 1
         self.version = 0
@@ -814,6 +817,7 @@ class Plus3DosFileHeader(object):
         000D001E 0E00F9C0 33323736
         380E0000 0080000D
     """
+
     def __init__(self, filetype=0, length=0, load_addr=0x8000):
         self.filetype = filetype
         self.load_addr = load_addr
